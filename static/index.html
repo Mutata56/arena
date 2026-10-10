@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>arena</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/season.css">
+  <link rel="stylesheet" href="/static/boss.css">
+  <link rel="stylesheet" href="/static/tz.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topwrap">
+      <div class="node">
+        <div class="where" id="where">загружаю</div>
+        <div class="title" id="node-title">...</div>
+        <a id="note-link" href="#" hidden>открыть конспект</a>
+        <div class="nodeline" id="nodeline"></div>
+        <div class="genline" id="genline" hidden></div>
+      </div>
+      <div class="counters">
+        <div class="counter gain"><b id="xp-today">0</b><span>сегодня</span></div>
+        <div class="counter"><b id="xp-total">0</b><span>всего XP</span></div>
+        <div class="counter" id="streak-box" hidden><b id="streak">0</b><span>дней подряд</span></div>
+      </div>
+    </div>
+    <div class="bars">
+      <div class="barbox">
+        <div class="label"><span>вопросы</span><span id="quiz-count">0 из 0</span></div>
+        <div class="bar" id="quiz-bar"><i></i></div>
+      </div>
+      <div class="barbox">
+        <div class="label"><span>карточки</span><span id="cards-count">0 из 0</span></div>
+        <div class="bar" id="cards-bar"><i></i></div>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs">
+      <button class="tab on" data-tab="today">сегодня</button>
+      <button class="tab" data-tab="map">карта</button>
+      <button class="tab" data-tab="boss">босс</button>
+      <button class="tab" data-tab="tz">ТЗ</button>
+      <button class="tab" data-tab="season">сезон</button>
+      <button class="tab" data-tab="feed">лента</button>
+      <button class="tab" data-tab="stats">статистика</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="view" id="view-today">
+      <div class="todaywrap">
+        <div class="todaymain">
+          <div id="stage"></div>
+          <div class="review" id="review-box" hidden></div>
+          <div class="ledger" id="ledger-box">
+            <h2>последнее</h2>
+            <ul id="ledger"></ul>
+          </div>
+          <div class="deed" id="deed-box" hidden>
+            <div class="deedtext">
+              <b>внешний подвиг</b>
+              <span id="deed-left">JavaRush и всё, что ты решал сегодня не здесь</span>
+            </div>
+            <button class="ghost" id="deed-btn">засчитать</button>
+          </div>
+        </div>
+        <aside class="left" id="left-box" hidden></aside>
+      </div>
+    </section>
+    <section class="view" id="view-map" hidden></section>
+    <section class="view" id="view-boss" hidden></section>
+    <section class="view" id="view-tz" hidden></section>
+    <section class="view" id="view-season" hidden></section>
+    <section class="view" id="view-feed" hidden></section>
+    <section class="view" id="view-stats" hidden></section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script src="/static/season.js"></script>
+  <script src="/static/boss.js"></script>
+  <script src="/static/tz.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+/* Вкладка «Задачи». Отдельным файлом, чтобы не спорить с общей темой. */
+
+.task .tag.state { border-color: var(--accent); color: var(--accent); }
+.task.ok { border-color: var(--ok); }
+.task.ok .tag.state { border-color: var(--ok); color: var(--ok); background: var(--ok-bg); }
+.task.work .tag.state { border-color: var(--gold); color: var(--gold); background: var(--gold-bg); }
+.task .question { margin-bottom: 8px; }
+.task code { background: var(--bg); padding: 1px 6px; border-radius: 5px; font-size: 12.5px; }
+
+.cases { margin-top: 12px; }
+.cases ul { list-style: none; margin: 6px 0 0; padding: 0; display: grid; DEMO_PROJECT: 4px; }
+.cases li { font-size: 13px; padding-left: 18px; position: relative; }
+.cases li::before { position: absolute; left: 0; font-weight: 700; }
+.cases li.ok { color: var(--ok); }
+.cases li.ok::before { content: "+"; }
+.cases li.bad { color: var(--bad); }
+.cases li.bad::before { content: "x"; }

@@ -1,0 +1,30 @@
+# Ночная генерация контента. Дёргается таймером arena-gen.timer, руками не нужен.
+# Ставится копией вместе с таймером:
+#   install -Dm644 ~/projects/arena/deploy/arena-gen.service ~/.config/systemd/user/arena-gen.service
+#   install -Dm644 ~/projects/arena/deploy/arena-gen.timer   ~/.config/systemd/user/arena-gen.timer
+#   systemctl --user daemon-reload && systemctl --user enable --now arena-gen.timer
+#
+# PATH прописан руками и с абсолютными путями, как в arena.service: окружение
+# systemd user НЕ содержит ~/.local/bin (раздел 2 плана). Сам конвейер зовёт claude
+# по абсолютному пути и на PATH не полагается, но соседние утилиты (git, java)
+# должны находиться и здесь.
+
+[Unit]
+Description=arena: ночная генерация контента
+Documentation=file://~/projects/arena/PLAN.md
+
+[Service]
+Type=oneshot
+WorkingDirectory=~/projects/arena
+Environment=PATH=~/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/lib/jvm/default/bin
+Environment=PYTHONPATH=~/projects/arena
+Environment=ARENA_ENV=prod
+ExecStart=~/projects/arena/.venv/bin/python -m arena gen --nightly
+# Ночной проход это фон: пусть не мешает ни петле дня, ни сборкам.
+Nice=10
+IOSchedulingClass=idle
+# Вызовы модели длинные и с разбросом: замеры на живом claude дали от 3.7 до 8 минут
+# на одну пачку вопросов. Сам проход укладывается в два часа (NIGHT_BUDGET_SEC),
+# юнит обрывает его на трёх как страховку. Недоделанное остаётся в очереди
+# и доедет следующей ночью или при входе в ноду.
+TimeoutStartSec=3h

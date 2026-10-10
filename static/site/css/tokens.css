@@ -1,0 +1,201 @@
+/* Токены оформления.
+   Два стиля, оба уже одобрены: editorial — тёплая книга, clean — светлый минимализм.
+   Три темы чтения: light, sepia, dark. Стиль и тема независимы, переключаются
+   атрибутами на <html>: data-style и data-theme.
+   Ни один компонент не имеет права писать цвет мимо этих переменных. */
+
+:root {
+  --ease: cubic-bezier(.23, 1, .32, 1);
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --fast: .14s;
+  --slow: .34s;
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 18px;
+
+  --measure: 68ch;          /* ширина колонки текста, меняется в настройках чтения */
+  --rail: 264px;            /* левая навигация */
+  --aside: 232px;           /* правая колонка с оглавлением */
+  --top: 56px;
+
+  --font-mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+  --shadow-1: 0 1px 2px rgba(20, 16, 10, .05), 0 4px 14px -6px rgba(20, 16, 10, .10);
+  --shadow-2: 0 2px 6px rgba(20, 16, 10, .07), 0 18px 44px -18px rgba(20, 16, 10, .26);
+}
+
+/* ---------------------------------------------------------------- editorial */
+
+[data-style="editorial"] {
+  --font-text: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua",
+               Georgia, "Times New Roman", serif;
+  --font-head: var(--font-text);
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif;
+  --text-size: 18.5px;
+  --line-height: 1.72;
+  --head-weight: 600;
+  --head-tracking: -.012em;
+}
+
+[data-style="editorial"][data-theme="light"] {
+  --paper: #faf7f0;
+  --card: #fffdf8;
+  --sunk: #f3eee3;
+  --ink: #221f1b;
+  --ink-soft: #4a443c;
+  --muted: #857c6f;
+  --line: #e4ddcf;
+  --line-soft: #efe9dd;
+  --accent: #bd5a2b;
+  --accent-ink: #fffdf8;
+  --accent-soft: #f6e7dc;
+  --ok: #3d7a4e;
+  --ok-soft: #e6f0e5;
+  --bad: #b1443a;
+  --bad-soft: #f8e6e2;
+  --gold: #a8791f;
+  --gold-soft: #f6ecd6;
+  --code-bg: #2c2721;
+  --code-ink: #efe7d9;
+  --mark: #f7e6a8;
+}
+
+[data-style="editorial"][data-theme="sepia"] {
+  --paper: #f2e7d3;
+  --card: #f8efdf;
+  --sunk: #ebdec6;
+  --ink: #2b2419;
+  --ink-soft: #52483a;
+  --muted: #8a7c66;
+  --line: #ddcdb0;
+  --line-soft: #e7dac1;
+  --accent: #a94f24;
+  --accent-ink: #fbf3e5;
+  --accent-soft: #efdcc9;
+  --ok: #3a6f45;
+  --ok-soft: #e0ecd9;
+  --bad: #a53f35;
+  --bad-soft: #f0dcd4;
+  --gold: #976d18;
+  --gold-soft: #eddfbe;
+  --code-bg: #2a2419;
+  --code-ink: #eee2cb;
+  --mark: #efd98d;
+}
+
+[data-style="editorial"][data-theme="dark"] {
+  --paper: #17150f;
+  --card: #1f1c15;
+  --sunk: #131109;
+  --ink: #ece4d5;
+  --ink-soft: #cdc4b3;
+  --muted: #948a78;
+  --line: #322d22;
+  --line-soft: #262119;
+  --accent: #e08a55;
+  --accent-ink: #17150f;
+  --accent-soft: #33241a;
+  --ok: #7fbc8b;
+  --ok-soft: #1c2a1e;
+  --bad: #e08a80;
+  --bad-soft: #2e1c1a;
+  --gold: #d9ae62;
+  --gold-soft: #2d2416;
+  --code-bg: #100e09;
+  --code-ink: #e6dcc8;
+  --mark: #5a4a1a;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, .4), 0 4px 14px -6px rgba(0, 0, 0, .5);
+  --shadow-2: 0 2px 6px rgba(0, 0, 0, .45), 0 18px 44px -18px rgba(0, 0, 0, .7);
+}
+
+/* ---------------------------------------------------------------- clean */
+
+[data-style="clean"] {
+  --font-text: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto,
+               Helvetica, Arial, sans-serif;
+  --font-head: var(--font-text);
+  --font-ui: var(--font-text);
+  --text-size: 16.5px;
+  --line-height: 1.68;
+  --head-weight: 640;
+  --head-tracking: -.021em;
+}
+
+[data-style="clean"][data-theme="light"] {
+  --paper: #ffffff;
+  --card: #ffffff;
+  --sunk: #f6f7f9;
+  --ink: #14171c;
+  --ink-soft: #3d444e;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --line-soft: #f0f1f4;
+  --accent: #5b5bd6;
+  --accent-ink: #ffffff;
+  --accent-soft: #eceafb;
+  --ok: #167a4c;
+  --ok-soft: #e6f4ec;
+  --bad: #c0362f;
+  --bad-soft: #fbeae8;
+  --gold: #96690d;
+  --gold-soft: #fbf0da;
+  --code-bg: #14171f;
+  --code-ink: #e8ecf3;
+  --mark: #fde68a;
+}
+
+[data-style="clean"][data-theme="sepia"] {
+  --paper: #f7f3ea;
+  --card: #fdfaf3;
+  --sunk: #f0ebe0;
+  --ink: #1d1b16;
+  --ink-soft: #453f36;
+  --muted: #77705f;
+  --line: #e4ddce;
+  --line-soft: #efe9dc;
+  --accent: #5551c4;
+  --accent-ink: #fdfaf3;
+  --accent-soft: #e7e5f7;
+  --ok: #1d7048;
+  --ok-soft: #e4f0e6;
+  --bad: #b13a32;
+  --bad-soft: #f6e5e0;
+  --gold: #8c6510;
+  --gold-soft: #f2e7cd;
+  --code-bg: #1b1a16;
+  --code-ink: #ece7db;
+  --mark: #f2ddA0;
+}
+
+[data-style="clean"][data-theme="dark"] {
+  --paper: #0f1216;
+  --card: #171b21;
+  --sunk: #0b0e12;
+  --ink: #e7ecf2;
+  --ink-soft: #c3cad3;
+  --muted: #97a1ad;
+  --line: #262c34;
+  --line-soft: #1d222a;
+  --accent: #8b8bf5;
+  --accent-ink: #0f1216;
+  --accent-soft: #1e1f3a;
+  --ok: #5ad18b;
+  --ok-soft: #14291d;
+  --bad: #ff8a8a;
+  --bad-soft: #2e1a1a;
+  --gold: #e6b062;
+  --gold-soft: #2b2313;
+  --code-bg: #090c10;
+  --code-ink: #e6edf3;
+  --mark: #4a4118;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, .4), 0 4px 14px -6px rgba(0, 0, 0, .5);
+  --shadow-2: 0 2px 6px rgba(0, 0, 0, .45), 0 18px 44px -18px rgba(0, 0, 0, .7);
+}
+
+/* Ширина колонки: настройка чтения. */
+[data-width="narrow"] { --measure: 58ch; }
+[data-width="wide"]   { --measure: 82ch; }
+
+/* Размер текста: настройка чтения. */
+[data-size="s"] { --text-size: 16px; }
+[data-size="l"] { --text-size: 20.5px; }

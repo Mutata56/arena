@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>arena. Портфель на GitHub</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/boss.css">
+  <link rel="stylesheet" href="/static/tz.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topwrap">
+      <div class="node">
+        <div class="where">портфель</div>
+        <div class="title">как опубликовать java-path на GitHub</div>
+      </div>
+      <div class="counters">
+        <a class="backlink" href="/#tz">к ТЗ</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="panel howto">
+      <div class="bossnote">
+        Публикация ручная и это осознанно: репозиторий с решениями твой, историю в нём пишешь
+        ты. arena туда не коммитит и не пушит ни при каких условиях, даже когда очень хочется.
+        Ниже порядок действий целиком, от первого коммита до ссылки, которую можно положить
+        в резюме. Спешить некуда: пока проектов один или два, публиковать особо нечего.
+      </div>
+
+      <div class="step">
+        <div class="num">1</div>
+        <div class="body">
+          <h3>Посмотреть, что вообще собралось</h3>
+          <p>Репозиторий уже существует, его завела arena при первой задаче.
+            В <code>tasks</code> лежат микрозадачи по нодам, в <code>projects</code> проекты
+            по ТЗ этапов. Это и есть портфель.</p>
+          <pre class="snippet">cd ~/projects/java-path
+git status
+git config core.quotepath false</pre>
+          <p>Последняя строка нужна один раз: без неё git показывает русские имена папок
+            кракозябрами, а у нас так названы почти все каталоги.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">2</div>
+        <div class="body">
+          <h3>Убрать лишнее из индекса</h3>
+          <p>В папках задач лежат служебные файлы arena и следы компиляции. В портфеле
+            им делать нечего. Заведи <code>.gitignore</code> в корне репозитория:</p>
+          <pre class="snippet">.arena.json
+.arena-tz.json
+*.class
+out/
+target/
+.idea/</pre>
+          <p>Отдельно пройдись глазами по своим файлам: имён серверов, логинов и данных
+            с работы в публичном репозитории быть не должно. Складская тематика в задачах
+            выдуманная, а вот случайно вставленный кусок реального лога уже нет.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">3</div>
+        <div class="body">
+          <h3>Представиться git</h3>
+          <p>Имя и почта попадут в каждый коммит и будут видны публично. Почту можно взять
+            скрытую, GitHub выдаёт такую в настройках профиля.</p>
+          <pre class="snippet">git config user.name "demo_user"
+git config user.email "твоя@почта"</pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">4</div>
+        <div class="body">
+          <h3>Первый коммит</h3>
+          <p>Один общий коммит на всё, что уже написано, дальше по одному на задачу или
+            проект. Сообщения человеческие: что сделал, а не «update».</p>
+          <pre class="snippet">git add .
+git commit -m "Задачи и проекты первых этапов"</pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">5</div>
+        <div class="body">
+          <h3>Завести репозиторий на GitHub</h3>
+          <p>На github.com кнопка New repository. Имя <code>java-path</code>, описание
+            в одну строку, видимость Public. Галочки Add README, Add .gitignore и
+            Choose a license НЕ ставь: файлы уже есть локально, а пустой README с той стороны
+            потом придётся сливать руками.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">6</div>
+        <div class="body">
+          <h3>Ключ SSH, если его ещё нет</h3>
+          <p>По SSH пушить удобнее: пароль не спрашивают, токены не протухают.</p>
+          <pre class="snippet">ls ~/.ssh/id_ed25519.pub || ssh-keygen -t ed25519 -C "java-path"
+cat ~/.ssh/id_ed25519.pub</pre>
+          <p>Содержимое второй команды копируется в GitHub: Settings, SSH and GPG keys,
+            New SSH key. Проверить связь: <code>ssh -T engineer1@example.invalid</code>, в ответ
+            должно прийти приветствие с твоим ником.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">7</div>
+        <div class="body">
+          <h3>Привязать и отправить</h3>
+          <p>Адрес берётся со страницы репозитория, вкладка SSH.</p>
+          <pre class="snippet">git remote add origin engineer1@example.invalid:ТВОЙ_НИК/java-path.git
+git branch -M main
+git push -u origin main</pre>
+          <p>Дальше достаточно <code>git push</code>. Если git ругается, что ветка
+            уже существует и расходится, значит на GitHub всё-таки создался README:
+            забери его командой <code>git pull --rebase</code> и повтори push.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">8</div>
+        <div class="body">
+          <h3>Сделать README витриной</h3>
+          <p>Это первое и часто единственное, что открывает человек по ссылке из резюме.
+            Пара абзацев про то, что здесь лежит и зачем, список проектов по ТЗ с одной
+            строкой описания на каждый, и чем каждый интересен технически. Про учебный
+            характер писать честно: джуна с честным учебным портфелем читают лучше,
+            чем с чужим скопированным.</p>
+          <p>Для каждого проекта по ТЗ уже есть README с постановкой: на него можно
+            просто сослаться из корневого.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="num">9</div>
+        <div class="body">
+          <h3>Ритм</h3>
+          <p>Коммит после каждой зелёной задачи, пуш раз в несколько дней. Ровная лента
+            коммитов на протяжении месяцев говорит про тебя больше, чем один большой
+            коммит в день перед собеседованием.</p>
+          <p>Проект по ТЗ имеет смысл коммитить дважды: как сдал и после доработок
+            по ревью. Видно, что ты умеешь принимать замечания и доводить работу.</p>
+        </div>
+      </div>
+
+      <div class="bossnote">
+        Если что-то пошло не так, ничего страшного не случилось: репозиторий локальный,
+        и его всегда можно отвязать от удалённого (<code>git remote remove origin</code>)
+        и начать этот шаг заново.
+      </div>
+    </div>
+  </main>
+</body>
+</html>

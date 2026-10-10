@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>arena. Сезон</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/season.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topwrap">
+      <div class="node">
+        <div class="where">гонка с Опусом</div>
+        <div class="title" id="season-title">сезон</div>
+      </div>
+      <div class="counters">
+        <a class="backlink" href="/">к занятию</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="season-root"></main>
+
+  <script src="/static/season.js"></script>
+  <script>window.arenaSeason.mount(document.getElementById("season-root"));</script>
+</body>
+</html>

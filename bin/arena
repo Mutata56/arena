@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Обёртка CLI. Ставится симлинком в ~/.local/bin/arena.
+set -euo pipefail
+ARENA_HOME="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)"
+PY="$ARENA_HOME/.venv/bin/python"
+[ -x "$PY" ] || PY="$(command -v python3)"
+exec env PYTHONPATH="$ARENA_HOME${PYTHONPATH:+:$PYTHONPATH}" "$PY" -m arena "$@"

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ru" data-style="editorial" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <title>схемы — предпросмотр</title>
+  <!-- Служебная страница: показывает все схемы из diagrams.js разом.
+       Нужна, когда рисуешь новую: открой /static/site/diagrams-preview.html -->
+  <link rel="stylesheet" href="/static/site/css/tokens.css">
+  <link rel="stylesheet" href="/static/site/css/app.css">
+  <style>body{padding:30px;max-width:820px;margin:0 auto}</style>
+</head>
+<body>
+  <div id="out" class="prose"></div>
+  <script type="module">
+    import { diagramsFor, DIAGRAM_INDEX } from "/static/site/js/diagrams.js";
+    const out = document.getElementById("out");
+    Object.keys(DIAGRAM_INDEX).forEach((code) => {
+      diagramsFor(code).forEach((d) => {
+        out.insertAdjacentHTML("beforeend", `<figure class="figure">
+          <div class="fig-title">${code} · ${d.title} · после «${d.anchor}»</div>
+          ${String(d.svg).replace(/\sheight="auto"/g, "")}
+          <figcaption>${d.caption || ""}</figcaption></figure>`);
+      });
+    });
+  </script>
+</body>
+</html>

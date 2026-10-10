@@ -1,0 +1,1364 @@
+/* Оболочка сайта: шапка, две боковые колонки, статья, интерактивные блоки.
+   Всё на переменных из tokens.css. */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* display у .chip и .stat сильнее, чем [hidden] — возвращаем атрибуту силу. */
+[hidden] { display: none !important; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection { background: color-mix(in srgb, var(--accent) 22%, transparent); }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; text-underline-offset: 2px; }
+
+button { font: inherit; color: inherit; }
+
+:where(button, a, input, textarea, [tabindex]):focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--accent) 65%, transparent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ---------------------------------------------------------------- шапка */
+
+.top {
+  position: sticky; top: 0; z-index: 40;
+  height: var(--top);
+  display: flex; align-items: center; DEMO_PROJECT: 14px;
+  padding: 0 18px;
+  background: color-mix(in srgb, var(--paper) 86%, transparent);
+  backdrop-filter: saturate(1.4) blur(14px);
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  display: flex; align-items: baseline; DEMO_PROJECT: 9px;
+  font-family: var(--font-head);
+  font-weight: 600; letter-spacing: -.02em; font-size: 17px;
+  color: var(--ink);
+}
+.brand:hover { text-decoration: none; }
+.brand .dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent); display: inline-block; transform: translateY(-1px);
+}
+.brand small { font-weight: 400; color: var(--muted); font-size: 12.5px; letter-spacing: 0; }
+
+.top .crumb {
+  flex: 1 1 auto; min-width: 0;
+  display: flex; align-items: center; DEMO_PROJECT: 8px;
+  color: var(--muted); font-size: 13px;
+}
+.top .crumb b {
+  color: var(--ink-soft); font-weight: 500;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.stat {
+  display: inline-flex; align-items: baseline; DEMO_PROJECT: 5px;
+  font-variant-numeric: tabular-nums; font-size: 13px; color: var(--muted);
+  white-space: nowrap;
+}
+.stat b { color: var(--ink); font-weight: 600; font-size: 14px; }
+.stat.ok b { color: var(--ok); }
+a.stat { text-decoration: none; }
+a.stat:hover { color: var(--ink); text-decoration: none; }
+a.stat:hover b { color: var(--accent); }
+
+.iconbtn {
+  display: inline-grid; place-items: center;
+  width: 32px; height: 32px; padding: 0;
+  border: 1px solid transparent; border-radius: 9px;
+  background: transparent; color: var(--muted); cursor: pointer;
+  transition: background var(--fast) var(--ease), color var(--fast) var(--ease),
+              border-color var(--fast) var(--ease), transform var(--fast) var(--ease);
+}
+.iconbtn:hover { background: var(--sunk); color: var(--ink); border-color: var(--line); }
+.iconbtn:active { transform: scale(.94); }
+.iconbtn svg { width: 17px; height: 17px; }
+
+/* ---------------------------------------------------------------- каркас */
+
+.shell {
+  display: grid;
+  grid-template-columns: var(--rail) minmax(0, 1fr) var(--aside);
+  align-items: start;
+  DEMO_PROJECT: 0;
+  max-width: 1560px;
+  margin: 0 auto;
+}
+
+.rail {
+  position: sticky; top: var(--top);
+  height: calc(100vh - var(--top));
+  overflow: auto; overscroll-behavior: contain;
+  padding: 20px 12px 40px 18px;
+  border-right: 1px solid var(--line);
+  scrollbar-width: thin;
+}
+
+.railhead {
+  font-size: 11px; text-transform: uppercase; letter-spacing: .09em;
+  color: var(--muted); font-weight: 600;
+  margin: 18px 0 8px 8px;
+}
+.railhead:first-child { margin-top: 0; }
+
+.railitem {
+  display: flex; align-items: center; DEMO_PROJECT: 9px;
+  width: 100%; text-align: left;
+  padding: 6px 9px; margin-bottom: 1px;
+  border: 0; border-radius: 8px; background: transparent;
+  color: var(--ink-soft); font-size: 13.5px; cursor: pointer;
+  transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+.railitem:hover { background: var(--sunk); color: var(--ink); }
+.railitem[aria-current="true"] { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+/* Код ноды не жмётся: у DBA он длиннее (d10.02 против 2.03), и на сжатии
+   текст вылезал за свою коробку прямо в название соседа. Ужимается название —
+   у него для этого есть многоточие. */
+.railitem .num {
+  font-variant-numeric: tabular-nums; font-size: 11.5px; color: var(--muted);
+  min-width: 30px; flex: 0 0 auto; font-family: var(--font-mono);
+}
+.railitem[aria-current="true"] .num { color: var(--accent); }
+.railitem .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.railitem.locked { opacity: .42; cursor: not-allowed; }
+.railitem .tick { margin-left: auto; color: var(--ok); font-size: 12px; }
+/* Сколько заданий конспекта осталось. Не галочка и не тревога: спокойная цифра,
+   которая говорит «сюда ещё стоит зайти». */
+.railitem .tick.left {
+  color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums;
+  min-width: 16px; text-align: right;
+}
+
+.stagepick {
+  display: flex; align-items: center; DEMO_PROJECT: 8px; width: 100%;
+  padding: 8px 10px; margin-bottom: 12px;
+  border: 1px solid var(--line); border-radius: 10px;
+  background: var(--card); color: var(--ink); cursor: pointer; font-size: 13.5px;
+  transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.stagepick:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+.stagepick .caret { margin-left: auto; color: var(--muted); }
+
+/* ---------------------------------------------------------------- правая колонка */
+
+.aside {
+  position: sticky; top: var(--top);
+  height: calc(100vh - var(--top));
+  overflow: auto; overscroll-behavior: contain;
+  padding: 26px 18px 40px 14px;
+  scrollbar-width: thin;
+}
+
+.toc { border-left: 2px solid var(--line-soft); }
+.toc a {
+  display: block; padding: 5px 0 5px 14px; margin-left: -2px;
+  border-left: 2px solid transparent;
+  color: var(--muted); font-size: 12.7px; line-height: 1.4;
+  transition: color var(--fast) var(--ease), border-color var(--fast) var(--ease);
+}
+.toc a:hover { color: var(--ink); text-decoration: none; }
+.toc a.on { color: var(--ink); border-left-color: var(--accent); font-weight: 600; }
+.toc a.read { color: color-mix(in srgb, var(--ok) 85%, var(--muted)); }
+
+.readout {
+  display: flex; align-items: center; DEMO_PROJECT: 10px;
+  margin: 0 0 16px;
+  font-size: 12px; color: var(--muted);
+}
+/* Классы, заданные для SVG, обязаны быть узкими: width и height в CSS применяются
+   и к элементам SVG тоже, и голый `.ring` схлопывал прямоугольники схем в кружки. */
+.readout .ring { width: 34px; height: 34px; flex: none; }
+.readout .ring circle { fill: none; stroke-width: 3.5; }
+.readout .ring .bg { stroke: var(--line); }
+.readout .ring .fg {
+  stroke: var(--accent); stroke-linecap: round;
+  transform: rotate(-90deg); transform-origin: 50% 50%;
+  transition: stroke-dasharray var(--slow) var(--ease);
+}
+.readout b { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+/* ---------------------------------------------------------------- статья */
+
+main { min-width: 0; padding: 0 40px 140px; }
+
+.article { max-width: var(--measure); margin: 0 auto; }
+
+.artmeta {
+  display: flex; flex-wrap: wrap; align-items: center; DEMO_PROJECT: 8px;
+  margin: 40px 0 14px;
+  font-family: var(--font-ui);
+}
+.chip {
+  display: inline-flex; align-items: center; DEMO_PROJECT: 5px;
+  padding: 3px 9px; border-radius: 99px;
+  border: 1px solid var(--line); background: var(--card);
+  font-size: 11.5px; color: var(--muted); letter-spacing: .01em;
+}
+a.chip { color: var(--ink-soft); DEMO_PROJECT: 7px; transition: border-color var(--fast) var(--ease),
+         background var(--fast) var(--ease), transform var(--fast) var(--ease); }
+a.chip:hover { text-decoration: none; background: var(--sunk);
+               border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+a.chip:active { transform: scale(.97); }
+.chip.accent { border-color: color-mix(in srgb, var(--accent) 35%, var(--line));
+               background: var(--accent-soft); color: var(--accent); }
+.chip.ok { border-color: color-mix(in srgb, var(--ok) 35%, var(--line));
+           background: var(--ok-soft); color: var(--ok); }
+.chip.gold { border-color: color-mix(in srgb, var(--gold) 35%, var(--line));
+             background: var(--gold-soft); color: var(--gold); }
+.chip .stars { font-family: var(--font-mono); letter-spacing: -.04em; }
+
+.article h1 {
+  font-family: var(--font-head);
+  font-size: clamp(29px, 4.2vw, 40px);
+  line-height: 1.14; font-weight: var(--head-weight);
+  letter-spacing: var(--head-tracking);
+  margin: 0 0 10px; color: var(--ink);
+  text-wrap: balance;
+}
+
+.artlead {
+  font-family: var(--font-text);
+  font-size: calc(var(--text-size) * 1.02);
+  color: var(--muted); margin: 0 0 8px;
+}
+
+.artrule {
+  height: 1px; border: 0; margin: 22px 0 30px;
+  background: linear-gradient(to right, var(--line), transparent);
+}
+
+.prose {
+  font-family: var(--font-text);
+  font-size: var(--text-size);
+  line-height: var(--line-height);
+  color: var(--ink);
+}
+.prose > * { max-width: 100%; }
+.prose p { margin: 0 0 1.05em; }
+.prose strong, .prose b { font-weight: 650; color: var(--ink); }
+.prose em { font-style: italic; }
+
+.prose h2 {
+  font-family: var(--font-head);
+  font-size: calc(var(--text-size) * 1.32);
+  font-weight: var(--head-weight); letter-spacing: var(--head-tracking);
+  line-height: 1.25; color: var(--ink);
+  margin: 2.1em 0 .7em; scroll-margin-top: calc(var(--top) + 18px);
+  position: relative;
+}
+.prose h2::before {
+  content: ""; position: absolute; left: -22px; top: .52em;
+  width: 8px; height: 2px; background: var(--accent); opacity: .55;
+}
+.prose h3 {
+  font-family: var(--font-head); font-size: calc(var(--text-size) * 1.08);
+  font-weight: 650; margin: 1.6em 0 .5em; scroll-margin-top: calc(var(--top) + 18px);
+}
+
+.prose ul, .prose ol { margin: 0 0 1.05em; padding-left: 1.35em; }
+.prose li { margin: .32em 0; }
+.prose li::marker { color: var(--muted); }
+.prose ul.checks { list-style: none; padding-left: 0; }
+.prose ul.checks li {
+  display: flex; DEMO_PROJECT: 10px; align-items: baseline;
+  padding: 5px 0; border-bottom: 1px dashed var(--line-soft);
+}
+.prose ul.checks li:last-child { border-bottom: 0; }
+.prose ul.checks .box {
+  flex: none; width: 15px; height: 15px; margin-top: 2px;
+  border: 1.5px solid var(--line); border-radius: 4px;
+  display: inline-grid; place-items: center; font-size: 10px; color: transparent;
+}
+.prose ul.checks li.done .box { background: var(--ok); border-color: var(--ok); color: #fff; }
+.prose ul.checks li.done { color: var(--muted); }
+
+.prose code {
+  font-family: var(--font-mono); font-size: .87em;
+  background: var(--sunk); border: 1px solid var(--line-soft);
+  padding: .09em .34em; border-radius: 5px;
+  overflow-wrap: break-word;
+}
+.prose pre {
+  margin: 1.2em 0; padding: 15px 17px;
+  background: var(--code-bg); color: var(--code-ink);
+  border-radius: var(--radius); overflow-x: auto;
+  font-size: 13.4px; line-height: 1.62; font-family: var(--font-mono);
+  box-shadow: var(--shadow-1);
+}
+.prose pre code { background: none; border: 0; padding: 0; font-size: inherit; color: inherit; }
+
+/* Код в статье выглядит как в редакторе задач: номера строк слева, подсветка та же. */
+.prose pre.hl { display: grid; grid-template-columns: auto minmax(0, 1fr); DEMO_PROJECT: 0 14px; }
+.prose pre.hl .linenos {
+  text-align: right; color: color-mix(in srgb, var(--code-ink) 34%, transparent);
+  user-select: none; white-space: pre; border-right: 1px solid
+    color-mix(in srgb, var(--code-ink) 14%, transparent); padding-right: 12px;
+}
+.prose pre.hl code { display: block; min-width: 0; overflow-x: auto; }
+.tok-comment { color: color-mix(in srgb, var(--code-ink) 48%, transparent); font-style: italic; }
+.tok-string  { color: var(--ok); }
+.tok-key     { color: var(--accent); font-weight: 600; }
+.tok-lit     { color: var(--gold); }
+.tok-type    { color: color-mix(in srgb, var(--code-ink) 92%, var(--accent)); }
+.tok-annot   { color: color-mix(in srgb, var(--code-ink) 60%, transparent); }
+.tok-fn      { color: var(--code-ink); }
+
+/* Безъязыковой фенс в волте это вывод программы, а не код. */
+.prose pre.out {
+  background: var(--sunk); color: var(--ink-soft);
+  border: 1px solid var(--line); box-shadow: none;
+}
+.prose pre.out::before {
+  content: "вывод"; display: block; margin-bottom: 8px;
+  font-family: var(--font-ui); font-size: 10.5px; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--muted);
+}
+
+.prose blockquote {
+  margin: 1.2em 0; padding: 2px 0 2px 18px;
+  border-left: 2px solid var(--line); color: var(--ink-soft);
+}
+
+.prose table {
+  width: 100%; margin: 1.3em 0; border-collapse: collapse;
+  font-family: var(--font-ui); font-size: 14px;
+}
+.tablewrap { overflow-x: auto; margin: 1.3em 0; }
+.tablewrap table { margin: 0; }
+.prose th, .prose td {
+  padding: 9px 12px; text-align: left; vertical-align: top;
+  border-bottom: 1px solid var(--line-soft);
+}
+.prose th {
+  font-weight: 600; color: var(--muted); font-size: 11.5px;
+  text-transform: uppercase; letter-spacing: .06em;
+  border-bottom: 1px solid var(--line);
+}
+.prose tbody tr:hover { background: var(--sunk); }
+.prose td:first-child { color: var(--ink); }
+
+.prose hr { border: 0; height: 1px; background: var(--line); margin: 2em 0; }
+
+/* Викиссылки */
+.wl { border-bottom: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); }
+.wl:hover { text-decoration: none; border-bottom-color: var(--accent); }
+.wl.dead { color: var(--muted); border-bottom-style: dashed; cursor: not-allowed; }
+
+/* ---------------------------------------------------------------- callout */
+
+.callout {
+  margin: 1.35em 0; border: 1px solid var(--line);
+  border-radius: var(--radius); background: var(--card);
+  overflow: hidden;
+}
+.callout > .co-head {
+  display: flex; align-items: center; DEMO_PROJECT: 9px; width: 100%;
+  padding: 11px 15px; border: 0; background: transparent;
+  font-family: var(--font-ui); font-size: 13.5px; font-weight: 600;
+  color: var(--ink); text-align: left;
+}
+.callout.fold > .co-head { cursor: pointer; }
+.callout.fold > .co-head:hover { background: var(--sunk); }
+.callout .co-ico { flex: none; display: grid; place-items: center; width: 18px; height: 18px; }
+.callout .co-ico svg { width: 15px; height: 15px; }
+.callout .co-caret {
+  margin-left: auto; color: var(--muted);
+  transition: transform var(--fast) var(--ease);
+}
+.callout[open] .co-caret, .callout.open .co-caret { transform: rotate(90deg); }
+.callout .co-body {
+  padding: 0 15px 12px; font-size: calc(var(--text-size) * .94);
+  border-top: 1px solid var(--line-soft); padding-top: 12px;
+}
+.callout .co-body > *:last-child { margin-bottom: 0; }
+.callout.fold:not(.open) .co-body { display: none; }
+
+.callout.tip   { border-left: 3px solid var(--accent); }
+.callout.tip .co-ico { color: var(--accent); }
+.callout.warning { border-left: 3px solid var(--gold); }
+.callout.warning .co-ico { color: var(--gold); }
+.callout.success { border-left: 3px solid var(--ok); }
+.callout.success .co-ico { color: var(--ok); }
+.callout.question { border-left: 3px solid var(--accent); }
+.callout.question .co-ico { color: var(--accent); }
+.callout.info  { border-left: 3px solid var(--muted); }
+.callout.info .co-ico { color: var(--muted); }
+
+/* ---------------------------------------------------------------- схемы */
+
+.figure {
+  margin: 1.8em 0; padding: 20px 20px 14px;
+  border: 1px solid var(--line); border-radius: var(--radius-lg);
+  background: var(--card);
+}
+.figure .fig-title {
+  font-family: var(--font-ui); font-size: 11px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 14px;
+}
+/* Высокие схемы (числовой круг, матрица видимости) иначе растягиваются на два
+   экрана: ширину они берут всю, а пропорции у них вертикальные. */
+.figure svg { display: block; width: 100%; height: auto; max-height: 460px; margin: 0 auto; }
+.figure figcaption {
+  margin-top: 12px; padding-top: 11px; border-top: 1px solid var(--line-soft);
+  font-family: var(--font-ui); font-size: 12.6px; color: var(--muted); line-height: 1.5;
+}
+
+/* ---------------------------------------------------------------- блок проверки */
+
+.check {
+  margin: 2em 0; border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line));
+  background: var(--card);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+  font-family: var(--font-ui);
+  scroll-margin-top: calc(var(--top) + 20px);
+}
+.check .ck-top {
+  display: flex; align-items: center; DEMO_PROJECT: 9px;
+  padding: 12px 18px; border-bottom: 1px solid var(--line-soft);
+  background: linear-gradient(to bottom,
+      color-mix(in srgb, var(--accent) 6%, transparent), transparent);
+  font-size: 11.5px; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--accent); font-weight: 650;
+}
+.check .ck-top .ck-n { margin-left: auto; color: var(--muted); letter-spacing: 0;
+                        text-transform: none; font-weight: 500; font-size: 12px;
+                        font-variant-numeric: tabular-nums; }
+.check .ck-body { padding: 16px 18px 18px; }
+.check .ck-q {
+  font-family: var(--font-text); font-size: calc(var(--text-size) * .98);
+  line-height: 1.55; margin: 0 0 14px; white-space: pre-wrap;
+}
+.check pre.snippet {
+  margin: 0 0 14px; padding: 13px 15px; border-radius: var(--radius-sm);
+  background: var(--code-bg); color: var(--code-ink);
+  font-family: var(--font-mono); font-size: 13px; line-height: 1.6; overflow-x: auto;
+}
+/* Сниппет в вопросе подсвечивается тем же движком, что и статья, и получает
+   те же номера строк: правило .prose pre.hl сюда не достаёт, дублируем. */
+pre.hl { display: grid; grid-template-columns: auto minmax(0, 1fr); DEMO_PROJECT: 0 14px; }
+pre.hl .linenos {
+  text-align: right; color: color-mix(in srgb, var(--code-ink) 34%, transparent);
+  user-select: none; white-space: pre; border-right: 1px solid
+    color-mix(in srgb, var(--code-ink) 14%, transparent); padding-right: 12px;
+}
+pre.hl code { display: block; min-width: 0; overflow-x: auto; }
+
+.opts { display: grid; DEMO_PROJECT: 7px; }
+.opt {
+  display: flex; DEMO_PROJECT: 11px; align-items: flex-start; width: 100%; text-align: left;
+  padding: 11px 13px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--paper); cursor: pointer; font-size: 14.6px; line-height: 1.45;
+  transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease),
+              transform var(--fast) var(--ease);
+}
+.opt:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+  background: var(--card);
+}
+.opt:active:not(:disabled) { transform: scale(.985); }
+.opt:disabled { cursor: default; }
+.opt .mark {
+  flex: none; width: 21px; height: 21px; border-radius: 6px;
+  display: grid; place-items: center;
+  border: 1px solid var(--line); background: var(--card);
+  font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+}
+.opt.correct { border-color: var(--ok); background: var(--ok-soft); }
+.opt.correct .mark { background: var(--ok); border-color: var(--ok); color: #fff; }
+.opt.wrong { border-color: var(--bad); background: var(--bad-soft); }
+.opt.wrong .mark { background: var(--bad); border-color: var(--bad); color: #fff; }
+.opt .txt.out { font-family: var(--font-mono); font-size: 13px; white-space: pre-wrap; }
+
+.ck-after { margin-top: 14px; }
+.explain {
+  padding: 12px 14px; border-radius: 10px; background: var(--sunk);
+  font-size: 14px; line-height: 1.55; color: var(--ink-soft);
+  border-left: 2px solid var(--line);
+}
+.explain b.v { color: var(--ok); }
+.ck-row { display: flex; align-items: center; DEMO_PROJECT: 10px; margin-top: 13px; flex-wrap: wrap; }
+
+.check.done { border-color: color-mix(in srgb, var(--ok) 28%, var(--line)); }
+/* Отвечал в прошлый заход и промахнулся. Варианты открыты, можно решать снова,
+   но видно, что вопрос уже трогали. */
+.check.missed { border-color: color-mix(in srgb, var(--bad) 32%, var(--line)); }
+.check.missed .ck-top { color: var(--bad); }
+/* Уже решённый до этого захода вопрос: спокойный, свёрнутый, но перерешать можно. */
+.check.solved { background: var(--sunk); box-shadow: none; }
+.check.solved .ck-q { color: var(--ink-soft); }
+.check.done .ck-top { color: var(--ok);
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--ok) 7%, transparent), transparent); }
+
+/* «это я уже знаю»: строка живёт под вариантами всегда, но видна только пока
+   вопрос открыт. Рисуем её тише кнопки ответа — это выход, а не действие. */
+.ck-skip { justify-content: flex-start; }
+.ck-skip .lbl { font-size: 12px; color: var(--muted); }
+.check.done .ck-skip { display: none; }
+/* Отмеченный изученным вопрос не зелёный: он не решён, он снят с дороги. */
+.check.known { border-color: var(--line); }
+.check.known .ck-top { color: var(--muted); background: none; }
+
+/* «дальше по тексту откроется, когда ответишь» */
+.gate {
+  margin: 2em 0; padding: 18px 20px;
+  border: 1px dashed var(--line); border-radius: var(--radius-lg);
+  background: var(--sunk); color: var(--muted);
+  font-family: var(--font-ui); font-size: 13.5px;
+  display: flex; align-items: center; DEMO_PROJECT: 12px;
+}
+.gate svg { width: 17px; height: 17px; flex: none; }
+/* Замок сообщает число, а навигатор — адрес: по кнопке видно, каких именно
+   вопросов не хватает, и не приходится листать лекцию в их поисках. */
+.gate { align-items: flex-start; }
+.qnav {
+  display: flex; align-items: center; flex-wrap: wrap; DEMO_PROJECT: 6px;
+  margin-top: 10px; font-size: 12.5px;
+}
+.qchip {
+  min-width: 28px; padding: 3px 8px;
+  border: 1px solid var(--line); border-radius: 8px;
+  background: var(--card); color: var(--ink);
+  font: inherit; font-weight: 600; cursor: pointer;
+  transition: border-color var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+.qchip:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Мигание после прыжка: без него вопрос посреди текста глазом не находится. */
+@keyframes qflash {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  15%, 65% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 40%, transparent); }
+}
+.check.flash { animation: qflash 1.6s var(--ease); }
+
+/* Точка в оглавлении: в этом разделе остался неотвеченный вопрос. */
+.toc a.has-q { position: relative; }
+.toc a.has-q::after {
+  content: ""; position: absolute; right: 2px; top: 50%;
+  width: 6px; height: 6px; margin-top: -3px;
+  border-radius: 50%; background: var(--accent);
+}
+
+/* ---------------------------------------------------------------- карточки */
+
+.flipwrap { display: grid; DEMO_PROJECT: 10px; margin: 1.4em 0; }
+.flip {
+  perspective: 1000px; background: none; border: 0; padding: 0;
+  cursor: pointer; text-align: left; font-family: var(--font-ui);
+}
+.flip .inner {
+  position: relative; transform-style: preserve-3d;
+  transition: transform .5s var(--ease); min-height: 74px;
+}
+.flip.on .inner { transform: rotateX(180deg); }
+.flip .face {
+  position: absolute; inset: 0; backface-visibility: hidden;
+  display: flex; align-items: center; padding: 15px 17px;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--card); font-size: 14.5px; line-height: 1.45;
+}
+.flip .face.back { transform: rotateX(180deg); background: var(--sunk); color: var(--ink-soft); }
+.flip:hover .face { border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); }
+.flip .sp { position: relative; min-height: 74px; visibility: hidden; }
+
+/* ---------------------------------------------------------------- запуск кода */
+
+.runbox { margin: 1.2em 0; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+.run-edit { background: var(--code-bg); }
+.run-edit .arena-editor { border-radius: 0; }
+.runbox pre { margin: 0; border-radius: 0; box-shadow: none; }
+.runbar {
+  display: flex; align-items: center; DEMO_PROJECT: 10px;
+  padding: 8px 12px; background: var(--sunk); border-top: 1px solid var(--line);
+  font-family: var(--font-ui); font-size: 12.5px; color: var(--muted);
+}
+.runout {
+  margin: 0; padding: 13px 15px; background: var(--card);
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono); font-size: 13px; line-height: 1.6;
+  white-space: pre-wrap; word-break: break-word; color: var(--ink);
+}
+.runout.err { color: var(--bad); }
+.runout .lbl {
+  display: block; margin-bottom: 6px; font-family: var(--font-ui); font-size: 10.5px;
+  letter-spacing: .09em; text-transform: uppercase; color: var(--muted);
+}
+
+/* ------------------------------------------------------------------ картинка */
+
+.pic { margin: 2em 0; text-align: center; }
+.pic img {
+  max-width: 100%; height: auto; display: block; margin: 0 auto;
+  border-radius: var(--radius); border: 1px solid var(--line-soft);
+}
+.pic figcaption {
+  margin-top: .7em; font-family: var(--font-ui); font-size: 13px;
+  color: var(--muted); line-height: 1.5;
+}
+.pic-stub { display: none; }
+.pic-missing img { display: none; }
+.pic-missing .pic-stub {
+  display: flex; align-items: center; justify-content: center; DEMO_PROJECT: .6em;
+  padding: 2.4em 1.2em; border-radius: var(--radius);
+  border: 1px dashed var(--line); background: var(--sunk);
+  font-family: var(--font-ui); font-size: 13px; color: var(--muted);
+}
+
+/* ---------------------------------------------------------------- мини-задача */
+
+.minitask {
+  margin: 2em 0; border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--line));
+  background: var(--card); overflow: hidden; font-family: var(--font-ui);
+  scroll-margin-top: calc(var(--top) + 20px);
+}
+.minitask.solved { border-color: color-mix(in srgb, var(--ok) 40%, var(--line)); }
+.minitask.failed { border-color: color-mix(in srgb, var(--bad) 35%, var(--line)); }
+
+/* ------------------------------------------------------------ терминал в статье */
+
+.minitask.terminal .tm-src { padding: 0 18px 12px; }
+.tm-name {
+  font-family: ui-monospace, Menlo, monospace; font-size: 12.5px;
+  color: var(--muted); padding: 4px 0 6px;
+}
+.tm-body {
+  display: grid; grid-template-columns: 170px 1fr; DEMO_PROJECT: 14px;
+  padding: 0 18px 14px; align-items: start;
+}
+.tm-lbl {
+  font-size: 11px; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--muted); margin-bottom: 6px;
+}
+.tm-files ul { list-style: none; margin: 0; padding: 0; }
+.tm-files li {
+  font-family: ui-monospace, Menlo, monospace; font-size: 12.5px;
+  padding: 4px 8px; border-radius: 7px; margin-bottom: 4px;
+  background: var(--sunk); color: var(--ink);
+}
+/* .class отличается на вид нарочно: в этой ноде всё держится на том, что он
+   появляется после javac и пропадает после rm. */
+.tm-files li.cls { color: var(--accent); border: 1px dashed color-mix(in srgb, var(--accent) 45%, transparent); }
+.tm-files li.empty { color: var(--muted); background: none; font-style: italic; }
+
+.tm-screen {
+  border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+  background: #14140f; min-width: 0;
+}
+.tm-log { max-height: 320px; overflow: auto; padding: 10px 12px 4px; }
+.tm-log:empty { display: none; }
+/* Вывод внутри терминала это не блок кода статьи: ни рамки, ни своей заливки,
+   ни отступов — иначе внутри чёрного экрана появляется ещё одна коробка. */
+.tm-cmd, .tm-out {
+  font-family: ui-monospace, Menlo, monospace; font-size: 12.8px; line-height: 1.55;
+  color: #e8e4d8; margin: 0 0 6px; white-space: pre-wrap; word-break: break-word;
+  background: none; border: 0; padding: 0; border-radius: 0;
+}
+.tm-cmd { color: #f2eee2; font-weight: 600; }
+.tm-out.bad { color: #f0a08a; }
+.tm-prompt { color: var(--accent); margin-right: 8px; font-weight: 700; }
+.tm-line { display: flex; align-items: center; DEMO_PROJECT: 0; padding: 9px 12px; border-top: 1px solid #2a2a22; }
+.tm-input {
+  flex: 1 1 auto; min-width: 0; background: none; border: 0; outline: none;
+  font-family: ui-monospace, Menlo, monospace; font-size: 12.8px; color: #f2eee2;
+}
+.tm-input::placeholder { color: #6d6a5e; }
+.tm-input:disabled { opacity: .5; }
+
+.tm-need { display: flex; align-items: center; flex-wrap: wrap; DEMO_PROJECT: 8px; padding: 0 18px 12px; }
+.tm-need .tm-lbl { margin: 0 4px 0 0; }
+.tm-hint {
+  font-family: ui-monospace, Menlo, monospace; font-size: 12.3px;
+  padding: 4px 10px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--card); color: var(--ink);
+}
+.tm-hint:hover { border-color: var(--accent); }
+.tm-hint.done { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, var(--line)); }
+.tm-hint.done::before { content: "✓ "; }
+/* Команда из «попробуй» обязана упасть — помечаем, чтобы человек не думал,
+   что он сделал что-то не так. */
+.tm-hint.probe { border-style: dashed; }
+.tm-hint.probe::after { content: " · упадёт"; color: var(--muted); font-size: 11px; }
+.tm-hint.probe.done::after { content: " · увидел"; color: var(--ok); }
+
+@media (max-width: 720px) {
+  .tm-body { grid-template-columns: 1fr; }
+}
+
+/* Решённая до этого захода задача сворачивается так же, как отвеченный вопрос:
+   пятнадцать развёрнутых редакторов подряд — это стена, а не страница. */
+.mt-folded { display: none; }
+.minitask.folded { background: var(--sunk); }
+.minitask.folded > *:not(.mt-top):not(.mt-folded) { display: none; }
+.minitask.folded .mt-folded {
+  display: flex; align-items: center; DEMO_PROJECT: 12px; flex-wrap: wrap;
+  padding: 12px 18px;
+}
+.mt-top {
+  display: flex; align-items: center; DEMO_PROJECT: 9px; padding: 12px 18px;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 11.5px; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--accent); font-weight: 650;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--accent) 6%, transparent), transparent);
+}
+.minitask.solved .mt-top { color: var(--ok);
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--ok) 7%, transparent), transparent); }
+.mt-top .mt-name { margin-left: auto; text-transform: none; letter-spacing: 0;
+  font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.mt-statement { padding: 14px 18px 4px; font-family: var(--font-text);
+  font-size: calc(var(--text-size) * .96); line-height: 1.55; }
+.mt-statement > *:last-child { margin-bottom: 10px; }
+.mt-input {
+  display: flex; flex-wrap: wrap; DEMO_PROJECT: 14px; padding: 8px 18px 10px;
+  font-size: 12.5px; color: var(--muted); border-top: 1px solid var(--line-soft);
+}
+.mt-input code { font-family: var(--font-mono); font-size: 12px; color: var(--ink);
+  background: var(--sunk); border-radius: 5px; padding: 1px 6px; }
+.mt-editor { height: 240px; border-top: 1px solid var(--line-soft); background: var(--code-bg); }
+.mt-editor textarea { width: 100%; height: 100%; border: 0; padding: 12px 14px; resize: none;
+  background: var(--code-bg); color: var(--code-ink); font-family: var(--font-mono);
+  font-size: 13.5px; line-height: 1.6; outline: none; }
+.mt-bar { display: flex; align-items: center; DEMO_PROJECT: 12px; padding: 12px 18px;
+  border-top: 1px solid var(--line-soft); background: var(--sunk); }
+.mt-note { color: var(--muted); font-size: 12.5px; }
+.minitask.solved .mt-note { color: var(--ok); font-weight: 600; }
+/* Отмечено «уже умею»: задание снято с дороги, но не решено. Зелёного тут быть
+   не должно — иначе через месяц не отличишь сделанное от пропущенного. */
+.minitask.known { border-color: var(--line); }
+.minitask.known .mt-top { color: var(--muted); background: none; }
+.minitask.known .mt-note { color: var(--muted); font-weight: 500; }
+.minitask.known .mt-folded .chip { color: var(--muted); border-color: var(--line);
+  background: var(--sunk); }
+.minitask.failed .mt-note { color: var(--bad); font-weight: 600; }
+.mt-out:not(:empty) { padding: 0 18px 16px; }
+.mt-out pre { margin: 12px 0 0; padding: 12px 14px; border-radius: 10px;
+  background: var(--sunk); color: var(--ink); font-family: var(--font-mono);
+  font-size: 13px; line-height: 1.6; white-space: pre-wrap; }
+.mt-out pre.mt-ok { background: var(--ok-soft); color: var(--ok); }
+.mt-out pre.mt-fail { background: var(--bad-soft); color: var(--bad); }
+.mt-diff { display: grid; grid-template-columns: 1fr 1fr; DEMO_PROJECT: 14px; }
+.mt-diff b { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+@media (max-width: 700px) { .mt-diff { grid-template-columns: 1fr; } }
+
+/* ---------------------------------------------------------------- порядок строк */
+
+.minitask.reorder .mt-statement { padding-bottom: 12px; }
+.ro-list { list-style: none; margin: 0; padding: 0 18px 4px; display: grid; DEMO_PROJECT: 6px; }
+.ro-row {
+  display: flex; align-items: center; DEMO_PROJECT: 10px;
+  padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--paper); cursor: grab;
+  transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease),
+              transform var(--fast) var(--ease);
+}
+.ro-row:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+.ro-row.dragging { opacity: .45; cursor: grabbing; transform: scale(.99); }
+.ro-row code {
+  flex: 1 1 auto; min-width: 0; font-family: var(--font-mono); font-size: 13px;
+  background: none; border: 0; padding: 0; color: var(--ink); overflow-x: auto;
+  white-space: pre;
+}
+.ro-grip { color: var(--muted); display: grid; place-items: center; flex: none; }
+.ro-move { display: flex; DEMO_PROJECT: 2px; flex: none; }
+.ro-move button {
+  width: 24px; height: 24px; border: 1px solid var(--line); border-radius: 6px;
+  background: var(--card); color: var(--muted); cursor: pointer; line-height: 1;
+  font-size: 12px; padding: 0;
+}
+.ro-move button:hover { color: var(--ink); border-color: var(--accent); }
+.minitask.reorder.solved .ro-row { border-color: color-mix(in srgb, var(--ok) 32%, var(--line)); }
+
+/* ---------------------------------------------------------------- кнопки */
+
+.btn {
+  display: inline-flex; align-items: center; DEMO_PROJECT: 8px;
+  padding: 8px 15px; border-radius: 9px;
+  border: 1px solid var(--line); background: var(--card); color: var(--ink);
+  font-family: var(--font-ui); font-size: 13.5px; font-weight: 500; cursor: pointer;
+  transition: background var(--fast) var(--ease), border-color var(--fast) var(--ease),
+              transform var(--fast) var(--ease), opacity var(--fast) var(--ease);
+  white-space: nowrap;
+}
+.btn:hover { background: var(--sunk); border-color: color-mix(in srgb, var(--ink) 18%, var(--line)); }
+.btn:active { transform: scale(.97); }
+.btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.btn.primary {
+  background: var(--accent); border-color: var(--accent); color: var(--accent-ink);
+}
+.btn.primary:hover { background: color-mix(in srgb, var(--accent) 88%, black); }
+.btn.ghost { border-color: transparent; background: transparent; color: var(--muted); }
+.btn.ghost:hover { background: var(--sunk); color: var(--ink); }
+.btn.ok { border-color: var(--ok); color: var(--ok); background: var(--ok-soft); }
+.btn .key {
+  font-family: var(--font-mono); font-size: 10.5px; padding: 1px 5px;
+  border: 1px solid currentColor; border-radius: 4px; opacity: .55;
+}
+.btn svg { width: 15px; height: 15px; }
+
+/* ---------------------------------------------------------------- задачи в конце статьи */
+
+.tasksblock { margin: 3.2em 0 0; font-family: var(--font-ui); }
+.tasksblock h2 {
+  font-family: var(--font-head); font-size: calc(var(--text-size) * 1.32);
+  margin: 0 0 4px; letter-spacing: var(--head-tracking);
+}
+.tasksblock .sub { color: var(--muted); font-size: 13.5px; margin: 0 0 18px; }
+
+.taskcard {
+  display: flex; align-items: center; DEMO_PROJECT: 14px; width: 100%; text-align: left;
+  padding: 15px 17px; margin-bottom: 9px;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--card); cursor: pointer;
+  transition: border-color var(--fast) var(--ease), transform var(--fast) var(--ease),
+              box-shadow var(--fast) var(--ease);
+}
+.taskcard:hover {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--line));
+  box-shadow: var(--shadow-1); transform: translateY(-1px);
+}
+.taskcard:active { transform: scale(.995); }
+.taskcard .ic {
+  flex: none; width: 34px; height: 34px; border-radius: 9px;
+  display: grid; place-items: center;
+  background: var(--accent-soft); color: var(--accent);
+}
+.taskcard.passed .ic { background: var(--ok-soft); color: var(--ok); }
+.taskcard .nm { flex: 1 1 auto; min-width: 0; }
+.taskcard .nm b { display: block; font-size: 15px; font-weight: 600; }
+.taskcard .nm span { font-size: 12.5px; color: var(--muted); }
+.taskcard .rt { text-align: right; font-size: 12px; color: var(--muted); white-space: nowrap; }
+
+/* ---------------------------------------------------------------- нижняя навигация */
+
+.nextbar {
+  display: flex; align-items: center; DEMO_PROJECT: 14px;
+  margin: 3.4em 0 0; padding-top: 22px; border-top: 1px solid var(--line);
+  font-family: var(--font-ui);
+}
+/* Выход на босса с карты этапа. Отдельная страница экзамена, поэтому это ссылка,
+   а не кнопка роутера. */
+.bossbar {
+  display: flex; align-items: center; DEMO_PROJECT: 14px; flex-wrap: wrap;
+  margin: 14px 0 18px; padding: 14px 16px;
+  border: 1px solid var(--accent); border-radius: 12px;
+  background: var(--card); color: var(--ink);
+  font-family: var(--font-ui); font-size: 14px; line-height: 1.5;
+}
+.bossbar .btn { margin-left: auto; }
+.bossbar.done { border-color: var(--line); color: var(--muted); }
+
+/* Задачник в боковом списке: подчинённая строка под своей нодой. */
+.railitem.drillitem {
+  padding-left: 22px; opacity: .78;
+  font-size: 12.5px;
+}
+.railitem.drillitem .num { color: var(--muted); }
+.railitem.drillitem .nm { color: var(--muted); }
+.railitem.drillitem:hover { opacity: 1; }
+.railitem.drillitem.on { opacity: 1; }
+.railitem.drillitem.on .nm { color: var(--ink); font-weight: 600; }
+
+/* Полоса «дальше задачник» внизу статьи и сам экран задачника. */
+.drillbar {
+  display: flex; align-items: center; DEMO_PROJECT: 16px; flex-wrap: wrap;
+  margin: 3em 0 0; padding: 18px 20px;
+  border: 1px solid var(--accent); border-radius: var(--radius-lg);
+  background: var(--card); font-family: var(--font-ui);
+}
+.drillbar.done { border-color: var(--line); }
+.drillbar .grow { flex: 1 1 220px; min-width: 0; }
+.drillbar b { display: block; font-size: 16px; font-weight: 650; margin: 2px 0; }
+.drillbar .lbl {
+  font-size: 11.5px; text-transform: uppercase; letter-spacing: .09em; color: var(--muted);
+}
+.drillbar .lbl.sub { text-transform: none; letter-spacing: 0; font-size: 13px; }
+.drillbar .btn { margin-left: auto; }
+
+/* «Я это знаю»: тихая кнопка рядом с задачником. Намеренно не акцентная —
+   это запасной выход, а не основной путь. Взведённая ждёт второго клика. */
+.knowbar {
+  display: flex; align-items: center; DEMO_PROJECT: 16px; flex-wrap: wrap;
+  margin: 14px 0 0; padding: 14px 20px;
+  border: 1px dashed var(--line); border-radius: var(--radius-lg);
+  background: transparent; font-family: var(--font-ui);
+  transition: border-color var(--fast) var(--ease), background var(--fast) var(--ease);
+}
+.knowbar .grow { flex: 1 1 220px; min-width: 0; }
+.knowbar b { display: block; font-size: 15px; font-weight: 650; margin: 2px 0; color: var(--ink-soft); }
+.knowbar .lbl {
+  font-size: 11.5px; text-transform: uppercase; letter-spacing: .09em; color: var(--muted);
+}
+.knowbar .lbl.sub { text-transform: none; letter-spacing: 0; font-size: 13px; line-height: 1.5; }
+.knowbar .btn { margin-left: auto; }
+.knowbar.armed { border-style: solid; border-color: var(--bad); background: var(--bad-soft); }
+.knowbar.armed .btn { border-color: var(--bad); color: var(--bad); font-weight: 600; }
+
+/* Колода вопросов: одна карточка на экране, ходим стрелками. */
+.deck-slide[hidden] { display: none; }
+.deck .check { margin: 0; }
+.deck-nav {
+  display: flex; align-items: center; DEMO_PROJECT: 14px; margin: 14px 0 0;
+  font-family: var(--font-ui);
+}
+.deck-nav .btn { flex: none; }
+.deck-nav .btn svg { width: 15px; height: 15px; vertical-align: -3px; }
+.deck-dots {
+  flex: 1 1 auto; display: flex; align-items: center; justify-content: center;
+  DEMO_PROJECT: 6px; flex-wrap: wrap;
+}
+.deck-dot {
+  width: 9px; height: 9px; padding: 0; border-radius: 50%; cursor: pointer;
+  border: 1px solid var(--line); background: var(--card);
+  transition: transform var(--fast) var(--ease);
+}
+.deck-dot:hover { transform: scale(1.25); }
+.deck-dot.done { background: var(--ok); border-color: var(--ok); }
+/* Отвечал и не угадал: точка заполнена, но другим цветом. Пустая означает
+   «даже не подходил», и путать эти два состояния нельзя. */
+.deck-dot.missed { background: var(--bad); border-color: var(--bad); opacity: .75; }
+.deck-dot.on { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 28%, transparent); border-color: var(--accent); }
+
+.drill-part { margin: 0 0 2.6em; }
+.drill-part > h2 { margin: 1.6em 0 .3em; }
+.drill-part > .sub { color: var(--muted); font-family: var(--font-ui); font-size: 14px; margin: 0 0 1.2em; }
+.drill .tasksblock { margin-top: 0; }
+
+.readybar {
+  margin: 2.6em 0 0; padding: 14px 16px;
+  border: 1px solid var(--line); border-radius: 12px; background: var(--card);
+  font-family: var(--font-ui); font-size: 14px; line-height: 1.5;
+}
+.readybar .lbl {
+  font-size: 11.5px; text-transform: uppercase; letter-spacing: .09em;
+  color: var(--muted); margin-bottom: 4px;
+}
+.readybar b { font-weight: 650; }
+
+.nextbar .grow { flex: 1 1 auto; min-width: 0; }
+.nextbar .lbl { font-size: 11.5px; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); }
+.nextbar b { display: block; font-size: 15.5px; font-weight: 600; }
+/* Замок на переходе: кнопка гаснет, но остаётся нажимаемой — иначе некому
+   объяснить, почему дальше не пускают. */
+.nextbar [data-next-why] { margin-top: 4px; text-transform: none; letter-spacing: 0; }
+.nextbar.locked b { color: var(--muted); }
+.nextbar.locked [data-next] { background: var(--card); color: var(--muted); border-color: var(--line); }
+.nextbar.locked [data-next]:hover { background: var(--card); }
+.nextbar [data-next] svg { width: 16px; height: 16px; vertical-align: -3px; }
+
+/* ---------------------------------------------------------------- всплывашки */
+
+.toast {
+  position: fixed; left: 50%; bottom: 26px; z-index: 90;
+  transform: translate(-50%, 12px); opacity: 0; pointer-events: none;
+  padding: 10px 17px; border-radius: 99px;
+  background: var(--ink); color: var(--paper);
+  font-family: var(--font-ui); font-size: 13.5px; font-weight: 500;
+  box-shadow: var(--shadow-2);
+  transition: opacity var(--fast) var(--ease), transform var(--slow) var(--ease);
+}
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+.scrim {
+  position: fixed; inset: 0; z-index: 60;
+  background: color-mix(in srgb, var(--ink) 34%, transparent);
+  opacity: 0; transition: opacity var(--fast) var(--ease);
+  backdrop-filter: blur(1.5px);
+}
+.scrim.on { opacity: 1; }
+
+.sheet {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 61;
+  width: min(400px, 100vw);
+  background: var(--card); border-left: 1px solid var(--line);
+  box-shadow: var(--shadow-2);
+  transform: translateX(100%); transition: transform var(--slow) var(--ease);
+  display: flex; flex-direction: column;
+  font-family: var(--font-ui);
+}
+.sheet.on { transform: none; }
+.sheet header {
+  display: flex; align-items: center; DEMO_PROJECT: 10px;
+  padding: 16px 18px; border-bottom: 1px solid var(--line);
+}
+.sheet header h3 { margin: 0; font-size: 15px; font-weight: 650; }
+.sheet header .iconbtn { margin-left: auto; }
+.sheet .body { padding: 18px; overflow: auto; flex: 1 1 auto; }
+
+.setrow { margin-bottom: 22px; }
+/* Подпись группы. Переключатель это тоже <label>, но у него своя раскладка,
+   поэтому заголовочный стиль его не касается. */
+.setrow > label:not(.switch) {
+  display: block; font-size: 11.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); font-weight: 600; margin-bottom: 8px;
+}
+.seg { display: flex; DEMO_PROJECT: 4px; padding: 3px; background: var(--sunk);
+       border: 1px solid var(--line); border-radius: 10px; }
+.seg button {
+  flex: 1 1 0; padding: 7px 8px; border: 0; border-radius: 7px;
+  background: transparent; color: var(--muted); font-size: 13px; cursor: pointer;
+  transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] {
+  background: var(--card); color: var(--ink); font-weight: 600; box-shadow: var(--shadow-1);
+}
+.switch { display: flex; align-items: center; DEMO_PROJECT: 12px; cursor: pointer; }
+.switch input { position: absolute; opacity: 0; width: 0; height: 0; }
+.switch .track {
+  width: 40px; height: 23px; border-radius: 99px; background: var(--line);
+  position: relative; transition: background var(--fast) var(--ease); flex: none;
+}
+.switch .track::after {
+  content: ""; position: absolute; top: 2.5px; left: 2.5px;
+  width: 18px; height: 18px; border-radius: 50%; background: var(--card);
+  box-shadow: var(--shadow-1); transition: transform var(--slow) var(--ease);
+}
+.switch input:checked + .track { background: var(--accent); }
+.switch input:checked + .track::after { transform: translateX(17px); }
+.switch .lb { font-size: 14px; }
+.switch .lb small { display: block; color: var(--muted); font-size: 12.3px; }
+
+/* ---------------------------------------------------------------- заметки */
+
+.hl { background: var(--mark); border-radius: 3px; padding: .05em 0;
+      box-decoration-break: clone; -webkit-box-decoration-break: clone; cursor: pointer; }
+.hl.note { border-bottom: 2px solid var(--accent); }
+
+.selbar {
+  position: absolute; z-index: 50; display: flex; DEMO_PROJECT: 2px; padding: 4px;
+  background: var(--ink); border-radius: 10px; box-shadow: var(--shadow-2);
+  opacity: 0; transform: translateY(4px) scale(.96); pointer-events: none;
+  transform-origin: bottom center;
+  transition: opacity var(--fast) var(--ease), transform var(--fast) var(--ease);
+}
+.selbar.on { opacity: 1; transform: none; pointer-events: auto; }
+.selbar button {
+  border: 0; background: transparent; color: var(--paper);
+  padding: 5px 10px; border-radius: 7px; font-size: 12.5px; cursor: pointer;
+  display: inline-flex; align-items: center; DEMO_PROJECT: 6px;
+}
+.selbar button:hover { background: rgba(255, 255, 255, .14); }
+
+.notelist { display: grid; DEMO_PROJECT: 10px; }
+.noteitem {
+  padding: 11px 13px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--paper); font-size: 13.4px;
+}
+.noteitem q { color: var(--ink-soft); font-style: italic; display: block; margin-bottom: 6px; }
+.noteitem .txt { color: var(--ink); }
+.noteitem .rm { float: right; }
+
+/* ---------------------------------------------------------------- карта */
+
+.mapwrap { max-width: 980px; margin: 0 auto; padding-top: 34px; font-family: var(--font-ui); }
+.mapwrap h1 { font-family: var(--font-head); font-size: 30px; margin: 0 0 6px;
+              letter-spacing: var(--head-tracking); }
+.mapwrap .sub { color: var(--muted); margin: 0 0 26px; }
+
+.stagerow {
+  display: flex; align-items: center; DEMO_PROJECT: 15px; width: 100%; text-align: left;
+  padding: 14px 16px; margin-bottom: 8px;
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--card);
+  cursor: pointer;
+  transition: border-color var(--fast) var(--ease), transform var(--fast) var(--ease);
+}
+.stagerow:hover { border-color: color-mix(in srgb, var(--accent) 40%, var(--line)); }
+.stagerow:active { transform: scale(.995); }
+.stagerow.locked { opacity: .5; cursor: not-allowed; }
+.stagerow .no {
+  flex: none; width: 38px; height: 38px; border-radius: 10px; display: grid; place-items: center;
+  background: var(--sunk); color: var(--muted); font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.stagerow.current .no { background: var(--accent); color: var(--accent-ink); }
+.stagerow.done .no { background: var(--ok-soft); color: var(--ok); }
+.stagerow .nm { flex: 1 1 auto; min-width: 0; }
+.stagerow .nm b { display: block; font-size: 15px; font-weight: 600; }
+.stagerow .nm span { font-size: 12.5px; color: var(--muted); }
+/* Селектор намеренно привязан к строке этапа. Голое `.bar` задевало схемы:
+   в SVG2 width и height это CSS-свойства, и правило страницы молча
+   переопределяло атрибуты фигуры — полосы диапазонов в схеме про целые типы
+   превращались в одинаковые чёрточки 120x4. Любой класс, встречающийся
+   в диаграммах, обязан быть привязан к своему контексту. */
+.stagerow .bar { height: 4px; border-radius: 99px; background: var(--line); overflow: hidden; width: 120px; flex: none; }
+
+/* Выделение нод на этапе: «эти я знаю». Галочка появляется только в режиме
+   выделения и только у тех нод, которые реально можно закрыть, — чтобы ряд
+   пустых квадратиков у запертых нод не обещал того, чего не будет. */
+.stagehead { display: flex; align-items: center; DEMO_PROJECT: 10px; flex-wrap: wrap; }
+.stagehead .btn:last-child:not(:first-child) { margin-left: auto; }
+.stagerow .tick { display: none; }
+.mapwrap.picking .stagerow[data-pickable] .tick {
+  display: grid; place-items: center; flex: none;
+  width: 20px; height: 20px; border-radius: 6px;
+  border: 1.5px solid var(--line); background: var(--card);
+  font-size: 12px; line-height: 1; color: transparent;
+  transition: background var(--fast) var(--ease), border-color var(--fast) var(--ease);
+}
+.mapwrap.picking .stagerow[data-pickable] .tick::after { content: "✓"; }
+.mapwrap.picking .stagerow:not([data-pickable]) { opacity: .45; }
+.stagerow.picked { border-color: var(--accent); background: var(--accent-soft); }
+.mapwrap.picking .stagerow.picked .tick {
+  background: var(--accent); border-color: var(--accent); color: var(--accent-ink);
+}
+
+/* Панель выделения липнет к низу: список этапа длинный, и кнопка «закрыть»
+   не должна уезжать за экран, пока человек листает и отмечает. */
+.pickbar {
+  position: sticky; bottom: 12px; z-index: 5;
+  display: flex; align-items: center; DEMO_PROJECT: 10px; flex-wrap: wrap;
+  margin: 14px 0 4px; padding: 12px 16px;
+  border: 1px solid var(--accent); border-radius: var(--radius);
+  background: var(--card); box-shadow: var(--shadow-2);
+  font-family: var(--font-ui); font-size: 14px;
+}
+.pickbar[hidden] { display: none; }
+.pickbar .grow { flex: 1 1 200px; min-width: 0; }
+.pickbar .grow b { font-weight: 650; }
+.pickbar .lbl { display: block; font-size: 12.5px; color: var(--muted); }
+.pickbar .btn { flex: none; white-space: nowrap; padding-left: 12px; padding-right: 12px; }
+.pickbar.armed { border-color: var(--bad); }
+.pickbar.armed [data-pick-go] { background: var(--bad); border-color: var(--bad); }
+
+.stagerow .bar i { display: block; height: 100%; background: var(--accent); border-radius: 99px;
+         transition: width var(--slow) var(--ease); }
+
+/* Экран задачи занимает всё окно: боковые колонки уходят. */
+body.bare .rail, body.bare .aside { display: none; }
+body.bare .shell { grid-template-columns: minmax(0, 1fr); }
+body.bare main { padding: 0; }
+
+/* ---------------------------------------------------------------- прочее */
+
+.empty {
+  max-width: 520px; margin: 90px auto; text-align: center;
+  font-family: var(--font-ui); color: var(--muted);
+}
+.empty h2 { font-family: var(--font-head); color: var(--ink); font-size: 22px; margin: 0 0 8px; }
+.empty p { margin: 0 0 18px; line-height: 1.6; }
+
+.skel { animation: pulse 1.4s ease-in-out infinite; background: var(--sunk); border-radius: 8px; }
+@keyframes pulse { 0%, 100% { opacity: .55; } 50% { opacity: .95; } }
+
+.spin { animation: spin 1s linear infinite; transform-origin: 50% 50%; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------------------------------------------------------------- адаптив */
+
+/* Сначала уезжает левая навигация, а не оглавление: прогресс чтения справа
+   нужен всё время, ноды этапа открываются кнопкой в шапке. */
+@media (max-width: 1240px) {
+  .shell { grid-template-columns: minmax(0, 1fr) var(--aside); }
+  .rail {
+    position: fixed; left: 0; top: var(--top); bottom: 0; z-index: 62;
+    width: 290px; background: var(--card); box-shadow: var(--shadow-2);
+    transform: translateX(-100%); transition: transform var(--slow) var(--ease);
+  }
+  .rail.on { transform: none; }
+  main { padding: 0 28px 130px; }
+}
+@media (max-width: 1000px) {
+  /* Шапка обязана оставаться в одну строку: сначала уходит этап, потом счётчики. */
+  .top .crumb #crumb-stage, .top .crumb span { display: none; }
+  .top .crumb b { font-size: 13.5px; }
+}
+@media (max-width: 860px) {
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  .aside { display: none; }
+  main { padding: 0 18px 120px; }
+  .stat:not(.ok) { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}
+
+/* ------------------------------------------------------------ задача на SQL
+
+   Коробка та же, что у мини-задачи: те же .mt-* внутри, тот же свёрнутый вид,
+   та же логика «решено / не сошлось». Отличается только начинка вывода —
+   вместо потока строк здесь таблица результата. */
+
+.sqltask {
+  margin: 2em 0; border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--line));
+  background: var(--card); overflow: hidden; font-family: var(--font-ui);
+  scroll-margin-top: calc(var(--top) + 20px);
+}
+.sqltask.solved { border-color: color-mix(in srgb, var(--ok) 40%, var(--line)); }
+.sqltask.failed { border-color: color-mix(in srgb, var(--bad) 35%, var(--line)); }
+.sqltask.folded { background: var(--sunk); }
+.sqltask.folded > *:not(.mt-top):not(.mt-folded) { display: none; }
+.sqltask.folded .mt-folded {
+  display: flex; align-items: center; DEMO_PROJECT: 12px; flex-wrap: wrap;
+  padding: 12px 18px;
+}
+
+/* Форма ответа сказано заранее: сколько строк ждём и важен ли их порядок.
+   Без этого «не сошлось» превращается в угадайку. */
+.sq-shape {
+  margin-left: auto; font-size: 11.5px; color: var(--muted);
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.sq-hint {
+  margin: 0 18px 12px; padding: 12px 14px; border-radius: var(--radius-sm);
+  background: var(--gold-soft); border: 1px solid color-mix(in srgb, var(--gold) 25%, var(--line));
+  font-size: 14px; color: var(--ink-soft);
+}
+.sq-hint > *:first-child { margin-top: 0; }
+.sq-hint > *:last-child { margin-bottom: 0; }
+
+/* Таблица результата. Скроллится внутри себя: широкий SELECT * не должен
+   растягивать страницу целиком. */
+.sq-tablewrap { overflow-x: auto; margin: 10px 0 4px; }
+.sq-table {
+  border-collapse: collapse; font-family: var(--font-mono);
+  font-size: 12.5px; min-width: 100%; background: var(--paper);
+  border: 1px solid var(--line); border-radius: var(--radius-sm);
+}
+.sq-table th, .sq-table td {
+  padding: 5px 11px; text-align: left; white-space: nowrap;
+  border-bottom: 1px solid var(--line-soft);
+}
+.sq-table th {
+  background: var(--sunk); color: var(--ink);
+  font-weight: 600; font-size: 11.5px; letter-spacing: .02em;
+  border-bottom: 1px solid var(--line); position: sticky; top: 0;
+  /* Имя колонки показываем ровно так, как его вернул движок: в SQL регистр
+     имени бывает значимым, и капслок от оформления тут прямо врёт. */
+  text-transform: none;
+}
+.sq-table tbody tr:last-child td { border-bottom: 0; }
+.sq-table td { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+/* NULL это не пустая ячейка, и путать их нельзя: на этом стоит половина
+   первого этапа про трёхзначную логику. */
+.sq-null { color: var(--muted); font-style: italic; opacity: .8; }
+
+.sq-status, .sq-time, .sq-more, .sq-state {
+  font-size: 11.5px; color: var(--muted); font-family: var(--font-mono);
+}
+.sq-status {
+  padding: 6px 10px; background: var(--sunk); border-radius: var(--radius-sm);
+  display: inline-block; margin: 6px 6px 2px 0; color: var(--ink-soft);
+}
+.sq-time { margin-top: 8px; }
+.sq-more { margin-top: 4px; font-style: italic; }
+.sq-state { margin-top: 6px; letter-spacing: .04em; }
+.sq-notice {
+  margin: 8px 0 0; padding: 8px 11px; border-radius: var(--radius-sm);
+  background: var(--gold-soft); color: var(--ink-soft);
+  font-family: var(--font-mono); font-size: 12px; white-space: pre-wrap;
+}
+.sq-want { margin-top: 12px; }
+.sq-want > b {
+  display: block; font-size: 11px; text-transform: uppercase;
+  letter-spacing: .08em; color: var(--muted); margin-bottom: 2px;
+}
+.sq-want .sq-table th { background: var(--ok-soft); }
+
+/* ------------------------------------------------------------ переключатель разделов */
+
+.trackpick {
+  display: flex; DEMO_PROJECT: 4px; padding: 4px; margin: 0 0 14px;
+  background: var(--sunk); border-radius: var(--radius);
+  border: 1px solid var(--line-soft);
+}
+.trackpick button {
+  flex: 1; display: flex; flex-direction: column; DEMO_PROJECT: 1px; align-items: flex-start;
+  padding: 7px 11px; border: 0; border-radius: var(--radius-sm);
+  background: transparent; color: var(--ink-soft); cursor: pointer;
+  font-family: var(--font-ui); font-size: 13.5px; text-align: left;
+  transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+.trackpick button:hover { background: color-mix(in srgb, var(--card) 70%, transparent); }
+.trackpick button[aria-current="true"] {
+  background: var(--card); color: var(--ink); font-weight: 600;
+  box-shadow: var(--shadow-1);
+}
+.trackpick .tp-sub {
+  font-size: 10.5px; font-weight: 400; color: var(--muted);
+  letter-spacing: .01em; text-transform: none;
+}
+.trackpick button[aria-current="true"] .tp-sub { color: var(--accent); }
+
+/* ------------------------------------------------------------ сценарий на сессиях
+
+   Лента шагов: слева видно, чья сессия ходит, справа — что она получила.
+   Ради этого блок и сделан отдельным от задачи: важен не текст запроса,
+   а порядок и то, кто кого ждал. */
+
+.sqlscenario {
+  margin: 2em 0; border-radius: var(--radius-lg);
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, var(--line));
+  background: var(--card); overflow: hidden; font-family: var(--font-ui);
+  scroll-margin-top: calc(var(--top) + 20px);
+}
+.sqlscenario.solved { border-color: color-mix(in srgb, var(--ok) 40%, var(--line)); }
+.sqlscenario.failed { border-color: color-mix(in srgb, var(--bad) 35%, var(--line)); }
+.sqlscenario.folded { background: var(--sunk); }
+.sqlscenario.folded > *:not(.mt-top):not(.mt-folded) { display: none; }
+.sqlscenario.folded .mt-folded {
+  display: flex; align-items: center; DEMO_PROJECT: 12px; flex-wrap: wrap; padding: 12px 18px;
+}
+
+.sc-steps { padding: 0 18px; }
+.sc-step {
+  border-left: 2px solid var(--line); padding: 0 0 14px 14px; margin-left: 6px;
+  position: relative;
+}
+.sc-step:last-child { padding-bottom: 4px; }
+/* Кружок на нитке времени: сразу видно, что шаги идут один за другим. */
+.sc-step::before {
+  content: ""; position: absolute; left: -5px; top: 6px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--card); border: 2px solid var(--line);
+}
+.sc-step[data-slot="B"] { border-left-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.sc-step[data-slot="B"]::before { border-color: color-mix(in srgb, var(--accent) 55%, var(--line)); }
+.sc-who {
+  font-size: 11.5px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 5px; display: flex; align-items: center; DEMO_PROJECT: 10px;
+}
+.sc-step[data-slot="B"] .sc-who { color: var(--accent); }
+.sc-wait-mark {
+  text-transform: none; letter-spacing: 0; font-size: 11px;
+  color: var(--gold); background: var(--gold-soft);
+  padding: 1px 8px; border-radius: 99px;
+}
+.sc-step pre.code { margin: 0 0 6px; }
+.sc-out:empty { display: none; }
+.sc-out { margin-top: 6px; }
+.sc-waited {
+  font-size: 11.5px; color: var(--gold); background: var(--gold-soft);
+  border-radius: var(--radius-sm); padding: 5px 10px; display: inline-block;
+  margin-bottom: 6px;
+}
+.sc-detail {
+  margin: 6px 0 0; padding: 8px 11px; border-radius: var(--radius-sm);
+  background: var(--sunk); color: var(--ink-soft);
+  font-family: var(--font-mono); font-size: 11.5px; white-space: pre-wrap;
+}
+.sc-out.sc-bad { border-left: 2px solid var(--bad); padding-left: 10px; }
+
+@media print {
+  .top, .rail, .aside, .check, .tasksblock, .nextbar { display: none !important; }
+  main { padding: 0; }
+}

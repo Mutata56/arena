@@ -1,0 +1,178 @@
+/* Экран задачи. Раскладка как в IDE: слева проект, в центре код, справа условие. */
+
+.ide {
+  position: fixed; inset: var(--top) 0 0 0;
+  display: grid; grid-template-rows: 46px minmax(0, 1fr);
+  background: var(--paper); font-family: var(--font-ui);
+}
+
+.ide-top {
+  display: flex; align-items: center; DEMO_PROJECT: 12px;
+  padding: 0 14px; border-bottom: 1px solid var(--line); background: var(--card);
+  min-width: 0;
+}
+.ide-top .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ide-top .nm b { font-size: 14px; font-weight: 600; }
+.ide-top .nm span { color: var(--muted); font-size: 12.5px; margin-left: 8px; }
+.ide-top .sp { flex: 1 1 auto; }
+
+.ide-grid {
+  display: grid; grid-template-columns: 224px minmax(0, 1fr) 380px;
+  min-height: 0; overflow: hidden;
+}
+/* Без min-height:0 элементы грида растягиваются под содержимое, вылезают за
+   фиксированный .ide и не скроллятся: страница-то не прокручивается. */
+.ide-grid > * { min-height: 0; }
+
+.ide-files {
+  border-right: 1px solid var(--line); background: var(--card);
+  overflow: auto; padding: 12px 8px;
+}
+.ide-files .grp {
+  font-size: 10.5px; letter-spacing: .09em; text-transform: uppercase;
+  color: var(--muted); font-weight: 650; padding: 8px 8px 5px;
+}
+.filerow {
+  display: flex; align-items: center; DEMO_PROJECT: 8px; width: 100%; text-align: left;
+  padding: 6px 9px; border: 0; border-radius: 7px; background: transparent;
+  color: var(--ink-soft); font-size: 13px; cursor: pointer; font-family: var(--font-mono);
+  transition: background var(--fast) var(--ease), color var(--fast) var(--ease);
+}
+.filerow:hover { background: var(--sunk); color: var(--ink); }
+.filerow[aria-current="true"] { background: var(--accent-soft); color: var(--ink); font-weight: 600; }
+.filerow svg { width: 14px; height: 14px; flex: none; color: var(--muted); }
+.filerow[aria-current="true"] svg { color: var(--accent); }
+.filerow { white-space: nowrap; overflow: hidden; }
+.filerow span:not(.ro) { overflow: hidden; text-overflow: ellipsis; }
+.filerow .ro { margin-left: auto; padding-left: 8px; flex: none;
+  font-family: var(--font-ui); font-size: 10.5px; color: var(--muted); }
+
+.ide-main { display: grid; grid-template-rows: 36px minmax(0, 1fr); min-width: 0; min-height: 0; }
+.ide-tabs {
+  display: flex; align-items: stretch; DEMO_PROJECT: 0; overflow-x: auto;
+  border-bottom: 1px solid var(--line); background: var(--sunk);
+}
+.ide-tab {
+  display: inline-flex; align-items: center; DEMO_PROJECT: 7px; padding: 0 14px;
+  border: 0; border-right: 1px solid var(--line); background: transparent;
+  color: var(--muted); font-size: 12.5px; cursor: pointer; white-space: nowrap;
+  font-family: var(--font-mono);
+}
+.ide-tab[aria-current="true"] { background: var(--code-bg); color: var(--code-ink); }
+.ide-tab .dirty { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); }
+
+.ide-edit { min-height: 0; position: relative; background: var(--code-bg); }
+/* У редактора фокус показывает каретка. Рамка вокруг всей области (её рисует
+   сам редактор через :focus-within) в раскладке IDE только мешает: редактор тут
+   и так занимает всю середину экрана. */
+.ide-edit textarea:focus-visible, .ide-edit :focus-visible { outline: none; }
+.ide-edit .arena-editor:focus-within { outline: none; }
+.ide-edit .arena-editor { border-left: 2px solid transparent; transition: border-color var(--fast) var(--ease); }
+.ide-edit .arena-editor:focus-within { border-left-color: var(--accent); }
+.ide-edit .ph {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  color: var(--muted); font-size: 13px;
+}
+
+.ide-side {
+  border-left: 1px solid var(--line); background: var(--card);
+  display: grid; grid-template-rows: 38px minmax(0, 1fr); min-width: 0; min-height: 0;
+}
+.sidetabs { display: flex; border-bottom: 1px solid var(--line); }
+.sidetab {
+  flex: 1 1 0; padding: 0 8px; border: 0; background: transparent; cursor: pointer;
+  color: var(--muted); font-size: 12.5px; border-bottom: 2px solid transparent;
+  transition: color var(--fast) var(--ease), border-color var(--fast) var(--ease);
+}
+.sidetab:hover { color: var(--ink); }
+.sidetab[aria-current="true"] { color: var(--ink); border-bottom-color: var(--accent); font-weight: 600; }
+.sidetab .n {
+  display: inline-block; min-width: 16px; margin-left: 4px; padding: 0 4px;
+  border-radius: 99px; background: var(--sunk); font-size: 10.5px; color: var(--muted);
+}
+.sidetab .n.bad { background: var(--bad-soft); color: var(--bad); }
+.sidetab .n.ok { background: var(--ok-soft); color: var(--ok); }
+
+.sidebody {
+  min-height: 0; overflow-y: auto; padding: 16px 16px 40px; font-size: 14px; line-height: 1.6;
+  overflow-wrap: anywhere;   /* в условиях встречаются длинные ссылки на docs.oracle */
+}
+.sidebody h3 { margin: 0 0 10px; font-size: 15px; font-family: var(--font-head); }
+.sidebody .prose { font-size: 14.5px; }
+.sidebody pre {
+  background: var(--code-bg); color: var(--code-ink); padding: 12px 14px;
+  border-radius: 10px; overflow-x: auto; font-family: var(--font-mono);
+  font-size: 12.6px; line-height: 1.6; margin: 12px 0;
+}
+
+.verdict { border-radius: 12px; border: 1px solid var(--line); overflow: hidden; margin-bottom: 14px; }
+.verdict .vhead {
+  display: flex; align-items: center; DEMO_PROJECT: 9px; padding: 12px 14px;
+  font-weight: 600; font-size: 13.5px;
+}
+.verdict.ok .vhead { background: var(--ok-soft); color: var(--ok); }
+.verdict.bad .vhead { background: var(--bad-soft); color: var(--bad); }
+.verdict .vbody { padding: 12px 14px; border-top: 1px solid var(--line); font-size: 13px; }
+.verdict pre { margin: 8px 0 0; }
+
+.caselist { display: grid; DEMO_PROJECT: 5px; margin-top: 8px; }
+.case {
+  border: 1px solid var(--line); border-radius: 8px; font-size: 12.8px; background: var(--paper);
+  overflow: hidden;
+}
+.case-head { display: flex; align-items: center; DEMO_PROJECT: 9px; padding: 7px 10px; }
+.case .st { width: 7px; height: 7px; border-radius: 50%; flex: none; background: var(--ok); }
+.case.bad .st { background: var(--bad); }
+.case.bad { border-color: color-mix(in srgb, var(--bad) 35%, var(--line)); }
+.case-mark { margin-left: auto; color: var(--muted); }
+/* Расхождение по видимому тесту: что просили и что получилось, рядом. */
+.case-diff {
+  display: grid; DEMO_PROJECT: 8px; padding: 0 10px 9px;
+  border-top: 1px solid var(--line); margin-top: 2px; padding-top: 9px;
+}
+.case-diff b {
+  display: block; font-size: 10px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 3px;
+}
+.case-diff code {
+  display: block; font-family: var(--font-mono); font-size: 12px; line-height: 1.5;
+  background: var(--sunk); border-radius: 6px; padding: 6px 8px; color: var(--ink);
+  white-space: pre-wrap; word-break: break-word;
+}
+.sidebody pre { white-space: pre-wrap; word-break: break-word; }
+
+.runfield { display: block; margin-bottom: 4px; }
+.runfield span {
+  display: block; font-size: 11px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--muted); font-weight: 600; margin-bottom: 6px;
+}
+.runfield input, .runfield textarea {
+  width: 100%; padding: 8px 11px; border: 1px solid var(--line); border-radius: 9px;
+  background: var(--paper); color: var(--ink); font-family: var(--font-mono);
+  font-size: 13px; line-height: 1.5; resize: vertical;
+}
+.runfield input:focus, .runfield textarea:focus { border-color: var(--accent); outline: none; }
+.runhint { color: var(--muted); font-size: 12px; margin: 4px 0 14px; line-height: 1.45; }
+.runhint code { font-family: var(--font-mono); font-size: 11.5px;
+  background: var(--sunk); border-radius: 4px; padding: 1px 4px; }
+
+.steps { display: grid; DEMO_PROJECT: 6px; margin: 10px 0 0; padding: 0; list-style: none; }
+.steps li { display: flex; align-items: center; DEMO_PROJECT: 9px; font-size: 13px; color: var(--muted); }
+.steps li .st {
+  width: 17px; height: 17px; border-radius: 50%; flex: none; display: grid; place-items: center;
+  border: 1.5px solid var(--line); font-size: 10px;
+}
+.steps li.ok { color: var(--ink); }
+.steps li.ok .st { background: var(--ok); border-color: var(--ok); color: #fff; }
+.steps li.bad { color: var(--bad); }
+.steps li.bad .st { background: var(--bad); border-color: var(--bad); color: #fff; }
+.steps li.skip { opacity: .5; }
+
+@media (max-width: 1180px) {
+  .ide-grid { grid-template-columns: 190px minmax(0, 1fr) 320px; }
+}
+@media (max-width: 940px) {
+  .ide-grid { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; }
+  .ide-files { display: none; }
+  .ide-side { border-left: 0; border-top: 1px solid var(--line); max-height: 42vh; }
+}

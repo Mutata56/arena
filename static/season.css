@@ -1,0 +1,64 @@
+/* Экран «Сезон». Ширины полосок задаются через переменную --p и calc,
+   чтобы в скрипте не было ни одного знака доли: приёмка фазы грепает
+   экран строго, и белых списков в ней нет. */
+
+.backlink { color: var(--accent); text-decoration: none; font-size: 13px; }
+
+.scoreline { display: grid; DEMO_PROJECT: 12px; margin: 6px 0 4px; }
+.side { display: grid; grid-template-columns: 90px 1fr auto; DEMO_PROJECT: 12px; align-items: center; }
+.side .who { font-size: 14px; font-weight: 600; }
+.side .who small { display: block; font-weight: 400; font-size: 11px; color: var(--muted); }
+.side .val { font-size: 18px; font-variant-numeric: tabular-nums; font-weight: 600; }
+.side .val em {
+  font-style: normal; font-size: 11px; font-weight: 500; color: var(--muted);
+  margin-left: 4px;
+}
+.side .track { height: 12px; background: var(--line); border-radius: 99px; overflow: hidden; }
+.side .track > i { display: block; height: 100%; width: calc(var(--p) * 1%); transition: width .4s ease; }
+.side.me .track > i { background: var(--ok); }
+.side.rival .track > i { background: var(--gold); }
+.side.me .val { color: var(--ok); }
+.side.rival .val { color: var(--gold); }
+
+.seasonhead { display: flex; justify-content: space-between; align-items: baseline; DEMO_PROJECT: 12px; flex-wrap: wrap; }
+.seasonhead .big { font-size: 20px; font-weight: 600; }
+.seasonhead .when { font-size: 12px; color: var(--muted); }
+.verdict { margin-top: 14px; font-size: 14px; }
+.verdict b { color: var(--ok); }
+.verdict.behind b { color: var(--gold); }
+
+.note { font-size: 13px; color: var(--muted); margin-top: 12px; }
+.note.warm { color: var(--ok); }
+
+.feed { list-style: none; margin: 0; padding: 0; }
+.feed li { display: flex; DEMO_PROJECT: 12px; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+.feed li:last-child { border-bottom: none; }
+.feed .when { color: var(--muted); font-size: 11.5px; white-space: nowrap; padding-top: 2px; min-width: 72px; }
+.feed .who { font-weight: 600; }
+
+.hist { list-style: none; margin: 0; padding: 0; }
+.hist li { display: flex; justify-content: space-between; DEMO_PROJECT: 12px; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+.hist li:last-child { border-bottom: none; }
+.hist .res { font-weight: 600; white-space: nowrap; }
+.hist .res.win { color: var(--ok); }
+.hist .res.loss { color: var(--gold); }
+.hist .res.aborted { color: var(--muted); }
+
+h2.block { font-size: 12px; color: var(--muted); font-weight: 600; margin: 0 0 10px;
+  text-transform: uppercase; letter-spacing: .04em; }
+
+.branches { display: grid; DEMO_PROJECT: 10px; margin-top: 14px; }
+.branch {
+  display: grid; grid-template-columns: 1fr auto; DEMO_PROJECT: 10px; align-items: center;
+  border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px;
+  background: none; color: inherit; font: inherit; text-align: left; cursor: pointer;
+}
+.branch:hover { border-color: var(--accent); }
+.branch.chosen { border-color: var(--accent); background: var(--bg); }
+.branch .name { font-size: 15px; font-weight: 600; }
+.branch .cost { font-size: 12.5px; color: var(--muted); }
+.branch .pick { font-size: 12px; color: var(--accent); }
+
+.built { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); DEMO_PROJECT: 12px; margin: 8px 0 4px; }
+.built div b { display: block; font-size: 20px; font-variant-numeric: tabular-nums; }
+.built div span { font-size: 11.5px; color: var(--muted); }

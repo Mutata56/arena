@@ -1,0 +1,25 @@
+# Ежедневный бэкап базы. Дёргается таймером arena-backup.timer, руками не нужен.
+# Ставится копией вместе с таймером:
+#   install -Dm644 ~/projects/arena/deploy/arena-backup.service ~/.config/systemd/user/arena-backup.service
+#   install -Dm644 ~/projects/arena/deploy/arena-backup.timer   ~/.config/systemd/user/arena-backup.timer
+#   systemctl --user daemon-reload && systemctl --user enable --now arena-backup.timer
+#
+# Копия делается через VACUUM INTO самим SQLite, поэтому сервер можно не гасить:
+# база живёт в WAL, и обычный cp под нагрузкой дал бы отставшую или битую копию.
+# Хранятся 14 штук, лишнее подчищает та же команда.
+
+[Unit]
+Description=arena: бэкап базы
+Documentation=file://~/projects/arena/PLAN.md
+
+[Service]
+Type=oneshot
+WorkingDirectory=~/projects/arena
+Environment=PATH=~/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/lib/jvm/default/bin
+Environment=PYTHONPATH=~/projects/arena
+Environment=ARENA_ENV=prod
+ExecStart=~/projects/arena/.venv/bin/python -m arena backup
+# Бэкап это фон: пусть не мешает ни петле дня, ни сборкам.
+Nice=10
+IOSchedulingClass=idle
+TimeoutStartSec=10m

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>arena. Босс</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/boss.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topwrap">
+      <div class="node">
+        <div class="where">бой с боссом</div>
+        <div class="title" id="boss-head">этап</div>
+      </div>
+      <div class="counters">
+        <a class="backlink" href="/">к занятию</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="boss-root"></main>
+
+  <script src="/static/boss.js"></script>
+  <script>window.arenaBoss.mount(document.getElementById("boss-root"));</script>
+</body>
+</html>

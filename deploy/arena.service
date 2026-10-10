@@ -1,0 +1,39 @@
+# Пользовательский юнит arena. Ставится копией:
+#   install -Dm644 ~/projects/arena/deploy/arena.service ~/.config/systemd/user/arena.service
+#   systemctl --user daemon-reload && systemctl --user enable --now arena
+# После правки этого файла копию надо обновить тем же install и повторить daemon-reload:
+# systemd читает свою копию, а не файл в репозитории.
+#
+# PATH прописан руками и с абсолютными путями. Окружение systemd user НЕ содержит
+# ~/.local/bin (проверено show-environment), поэтому голый вызов claude из-под сервиса
+# упал бы, а из интерактивного шелла работал: ровно та ловушка из раздела 2 плана,
+# которая маскируется при отладке. Фазе 4 это критично, генератор зовёт claude.
+
+[Unit]
+Description=arena: тренажёр Java на localhost
+Documentation=file://~/projects/arena/PLAN.md
+After=graphical-session.target
+
+[Service]
+Type=simple
+WorkingDirectory=~/projects/arena
+Environment=PATH=~/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/usr/lib/jvm/default/bin
+Environment=PYTHONPATH=~/projects/arena
+Environment=ARENA_ENV=prod
+# Фоновый конвейер генерации выключен. Он тратит живые вызовы модели при каждом
+# входе в ноду, а банк первых нод уже засеян, поэтому включать его молча неправильно.
+# Когда захочешь, чтобы ноды наполнялись сами: убери эту строку (или поставь 1),
+# потом install и systemctl --user daemon-reload, потом restart arena.
+# Ночная генерация от этой переменной не зависит, ею правит arena-gen.timer.
+Environment=ARENA_GEN_WORKER=1
+ExecStart=~/projects/arena/.venv/bin/python -m arena serve
+Restart=on-failure
+RestartSec=3
+# Песочные настройки (PrivateTmp, NoNewPrivileges) намеренно НЕ включены.
+# Сервер слушает только 127.0.0.1, секретов у него нет, а фазе 3 из этого же процесса
+# запускать прогоны кода: PrivateTmp дал бы сервису свой /tmp, невидимый транзитному
+# юниту systemd-run, и рабочая папка прогона просто не нашлась бы. Изоляция прогонов
+# живёт в run_java (раздел 12), а не здесь.
+
+[Install]
+WantedBy=default.target

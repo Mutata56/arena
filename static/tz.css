@@ -1,0 +1,62 @@
+/* Экран ТЗ. Тон спокойнее, чем у боя: это не событие на полчаса, а работа
+   на несколько вечеров, и главное здесь читаемость постановки. */
+
+.tzhead.ok { border-color: var(--ok); }
+.tzhead.work { border-color: var(--gold); }
+.tzhead .tag.state { color: var(--ink); border-color: var(--line); font-weight: 600; }
+.tzhead .bosstitle { font-size: 22px; text-align: left; margin-bottom: 10px; }
+.tzhead .hint code { background: var(--bg); padding: 1px 5px; border-radius: 5px; }
+
+.spec { line-height: 1.6; }
+.spec h2.spech {
+  font-size: 15px; margin: 20px 0 8px; font-weight: 700; color: var(--ink);
+  letter-spacing: 0; text-transform: none;
+}
+.spec h3.spech, .spec h4.spech { font-size: 14px; margin: 16px 0 6px; font-weight: 600; }
+.spec p { margin: 8px 0; font-size: 14.5px; }
+.spec ul, .spec ol { margin: 8px 0 8px 20px; padding: 0; font-size: 14.5px; }
+.spec li { margin: 5px 0; }
+.spec code {
+  background: var(--bg); padding: 1px 5px; border-radius: 5px; font-size: 13px;
+  font-family: "JetBrains Mono", Consolas, Menlo, monospace;
+}
+.spec .snippet { margin: 10px 0; }
+
+.fixes { margin: 0 0 0 20px; padding: 0; }
+.fixes li { padding: 10px 0; border-bottom: 1px solid var(--line); }
+.fixes li:last-child { border-bottom: none; }
+.fixwhat { font-size: 14.5px; font-weight: 500; margin-bottom: 4px; }
+
+.advice { list-style: none; margin: 0; padding: 0; }
+.advice li { font-size: 13.5px; color: var(--muted); padding: 5px 0; }
+
+.defense .dq .score { float: right; color: var(--gold); font-size: 12px; font-weight: 700; }
+
+.cases ul { list-style: none; margin: 6px 0 0; padding: 0; display: grid; DEMO_PROJECT: 4px; }
+.cases li { font-size: 13px; padding-left: 16px; position: relative; }
+.cases li::before { position: absolute; left: 0; }
+.cases li.ok::before { content: "+"; color: var(--ok); }
+.cases li.bad::before { content: "!"; color: var(--bad); }
+.cases li.bad { color: var(--bad); }
+
+.hist { list-style: none; margin: 0; padding: 0; }
+.hist li {
+  display: flex; justify-content: space-between; DEMO_PROJECT: 12px; font-size: 13.5px;
+  padding: 6px 0; border-bottom: 1px solid var(--line);
+}
+.hist li:last-child { border-bottom: none; }
+.hist .res.win { color: var(--ok); }
+.hist .res.loss { color: var(--gold); }
+
+/* страница про публикацию портфеля */
+.howto { max-width: 780px; margin: 0 auto; padding: 0 18px; }
+.howto .step { display: flex; DEMO_PROJECT: 14px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.howto .step:last-child { border-bottom: none; }
+.howto .num {
+  flex: 0 0 26px; height: 26px; border-radius: 99px; border: 1px solid var(--line);
+  display: grid; place-items: center; font-size: 13px; color: var(--muted);
+}
+.howto .body { flex: 1; min-width: 0; }
+.howto .body h3 { margin: 2px 0 6px; font-size: 15px; }
+.howto .body p { margin: 6px 0; font-size: 14px; line-height: 1.55; }
+.howto .snippet { margin: 8px 0; }
